@@ -1,5 +1,8 @@
 package io.Adrestus.Backend.MemoryBuffer;
 
+import io.Adrestus.bloom_filter.core.BloomObject;
+
+import java.util.List;
 import java.util.TreeSet;
 
 public interface IAddressMemoryPoll {
@@ -10,9 +13,12 @@ public interface IAddressMemoryPoll {
 
     public String[] retrieveAll();
 
+    public List<String> contains(BloomObject bloomObject);
     public TreeSet<String> getResources();
 
     public int size();
 
     public void setResources(TreeSet<String> resources);
+
+
 }

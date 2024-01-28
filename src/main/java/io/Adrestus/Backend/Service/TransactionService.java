@@ -34,6 +34,9 @@ public class TransactionService {
         return this.KVRepository.getTransactionsByBloomFilter(bloomObject);
     }
 
+    public  HashMap<String, String>getTransactionsBalance(BloomObject bloomObject,String zone) {
+        return this.KVRepository.getTransactionsBalance(bloomObject,zone);
+    }
     public int deleteALL() {
         return this.KVRepository.deleteALL();
     }

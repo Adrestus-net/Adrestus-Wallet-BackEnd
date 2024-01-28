@@ -33,7 +33,7 @@ public class TransactionController {
         return this.transactionService.getTransactionsByAddress(address);
     }
 
-    @GetMapping(value = "/bloom_filter")
+    @PostMapping(value = "/bloom_filter")
     public @ResponseBody HashMap<String, ResponseDao> getTransactionsByBloomFilter(@RequestBody BloomObject bloomObject) {
         return this.transactionService.getTransactionsByBloomFilter(bloomObject);
     }

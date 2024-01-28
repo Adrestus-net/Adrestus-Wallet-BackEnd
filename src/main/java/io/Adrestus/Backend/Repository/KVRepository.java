@@ -14,6 +14,8 @@ public interface KVRepository {
 
     public ResponseDao getTransactionsByAddress(String address);
 
+    public  HashMap<String, String> getTransactionsBalance(BloomObject bloomObject,String zone);
+
     public HashMap<String, ResponseDao> getTransactionsByBloomFilter(BloomObject bloomObject);
 
     public int deleteALL();
