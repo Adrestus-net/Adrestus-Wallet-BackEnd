@@ -1,7 +1,7 @@
 package io.Adrestus.Backend.Service;
 
 import io.Adrestus.Backend.Repository.UserRepository;
-import io.Adrestus.Backend.model.DAOUser;
+import io.Adrestus.Backend.model.UserModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,7 +19,7 @@ public class JwtUserDetailsService {
     private UserRepository userDao;
 
     public UserDetails loadUserDetails(String username) throws UsernameNotFoundException {
-        DAOUser user = userDao.findByUsername(username);
+        UserModel user = userDao.findByUsername(username);
         if (user == null)
             throw new UsernameNotFoundException("User not found with username: " + username);
         return new User(user.getUsername(), user.getPassword(), Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")));

@@ -1,8 +1,7 @@
 package io.Adrestus.Backend.Service;
 
 import io.Adrestus.Backend.Repository.UserRepository;
-import io.Adrestus.Backend.model.DAOUser;
-import io.Adrestus.Backend.model.UserDTO;
+import io.Adrestus.Backend.model.UserModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -29,18 +28,18 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        DAOUser user = userDao.findByUsername(username);
+        UserModel user = userDao.findByUsername(username);
         if (user != null) {
             return new User(user.getUsername(), user.getPassword(), Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")));
         }
         throw new UsernameNotFoundException("User not found with the name " + username);
     }
 
-    public DAOUser save(UserDTO user) {
-        DAOUser finduser = userDao.findByUsername(user.getUsername());
+    public UserModel save(UserModel user) {
+        UserModel finduser = userDao.findByUsername(user.getUsername());
         if (finduser != null)
             return finduser;
-        DAOUser newUser = new DAOUser();
+        UserModel newUser = new UserModel();
         newUser.setUsername(user.getUsername());
         newUser.setPassword(bcryptEncoder.encode(user.getPassword()));
         return userDao.save(newUser);

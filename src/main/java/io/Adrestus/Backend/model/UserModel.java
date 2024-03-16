@@ -5,7 +5,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "user")
-public class DAOUser {
+public class UserModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,10 +15,10 @@ public class DAOUser {
     @Column
     private String password;
 
-    public DAOUser() {
+    public UserModel() {
     }
 
-    public DAOUser(String username, String password) {
+    public UserModel(String username, String password) {
         this.username = username;
         this.password = password;
     }
@@ -51,8 +51,8 @@ public class DAOUser {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DAOUser daoUser = (DAOUser) o;
-        return id == daoUser.id && Objects.equals(username, daoUser.username) && Objects.equals(password, daoUser.password);
+        UserModel userModel = (UserModel) o;
+        return id == userModel.id && Objects.equals(username, userModel.username) && Objects.equals(password, userModel.password);
     }
 
     @Override

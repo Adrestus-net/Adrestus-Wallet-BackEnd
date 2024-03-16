@@ -1,7 +1,13 @@
-package io.Adrestus.Backend.Repository;
+package io.Adrestus.Backend.implementation;
 
 import com.google.common.reflect.TypeToken;
+import io.Adrestus.Backend.DTO.TransactionDetailsDTO;
 import io.Adrestus.Backend.MemoryBuffer.AddressMemoryInstance;
+import io.Adrestus.Backend.Repository.TransactionWalletRepository;
+import io.Adrestus.Backend.Service.AccountService;
+import io.Adrestus.Backend.Service.TransactionService;
+import io.Adrestus.Backend.Util.TransactionConverter;
+import io.Adrestus.Backend.model.TransactionModel;
 import io.Adrestus.Backend.payload.response.ResponseDao;
 import io.Adrestus.MemoryTreePool;
 import io.Adrestus.Trie.PatriciaTreeNode;
@@ -12,6 +18,7 @@ import io.Adrestus.mapper.MemoryTreePoolSerializer;
 import io.Adrestus.util.SerializationUtil;
 import io.distributedLedger.*;
 import io.vavr.control.Option;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.Type;
@@ -22,13 +29,16 @@ import java.util.Optional;
 
 
 @Repository("transactionDao")
-public class TransactionDataAccessRepository implements KVRepository {
+public class TransactionWalletImplementation implements TransactionWalletRepository {
 
     private static List<Transaction> memorydb = new ArrayList<>();
     private IDatabase<String, LevelDBTransactionWrapper<Transaction>> database;
     private final SerializationUtil patricia_tree_wrapper;
 
-    public TransactionDataAccessRepository() {
+    @Autowired
+    private AccountService accountService;
+
+    public TransactionWalletImplementation() {
         Type fluentType = new TypeToken<MemoryTreePool>() {
         }.getType();
         List<SerializationUtil.Mapping> list = new ArrayList<>();
@@ -62,15 +72,22 @@ public class TransactionDataAccessRepository implements KVRepository {
 
     @Override
     public ResponseDao getTransactionsByAddress(String address) {
-        Optional<LevelDBTransactionWrapper<Transaction>> wrapper = database.findByKey(address);
-        if (wrapper.isPresent()) {
-            ArrayList<Transaction> from = new ArrayList<>();
-            ArrayList<Transaction> to = new ArrayList<>();
-            wrapper.get().getFrom().stream().forEach(val -> from.add(val));
-            wrapper.get().getTo().stream().forEach(val -> to.add(val));
-            return new ResponseDao(from, to);
-        }
-        return null;
+        ArrayList<Transaction> from = new ArrayList<>();
+        ArrayList<Transaction> to = new ArrayList<>();
+        List<TransactionDetailsDTO> fromModel=accountService.findTransactionsByFromAddress(address);
+        List<TransactionDetailsDTO> toModel=accountService.findTransactionsByToAddress(address);
+        fromModel.stream().forEach(val->from.add(TransactionConverter.convert(val)));
+        toModel.stream().forEach(val->to.add(TransactionConverter.convert(val)));
+        return new ResponseDao(from, to);
+//        Optional<LevelDBTransactionWrapper<Transaction>> wrapper = database.findByKey(address);
+//        if (wrapper.isPresent()) {
+//            ArrayList<Transaction> from = new ArrayList<>();
+//            ArrayList<Transaction> to = new ArrayList<>();
+//            wrapper.get().getFrom().stream().forEach(val -> from.add(val));
+//            wrapper.get().getTo().stream().forEach(val -> to.add(val));
+//            return new ResponseDao(from, to);
+//        }
+//        return null;
     }
 
     @Override

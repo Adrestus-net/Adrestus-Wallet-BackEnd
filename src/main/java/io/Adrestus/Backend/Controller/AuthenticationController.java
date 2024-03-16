@@ -2,7 +2,7 @@ package io.Adrestus.Backend.Controller;
 
 import io.Adrestus.Backend.Service.CustomUserDetailsService;
 import io.Adrestus.Backend.Util.JwtUtil;
-import io.Adrestus.Backend.model.UserDTO;
+import io.Adrestus.Backend.model.UserModel;
 import io.Adrestus.Backend.payload.request.AuthenticationRequest;
 import io.Adrestus.Backend.payload.response.AuthenticationResponse;
 import io.jsonwebtoken.impl.DefaultClaims;
@@ -54,7 +54,7 @@ public class AuthenticationController {
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public ResponseEntity<?> saveUser(@RequestBody UserDTO user) throws Exception {
+    public ResponseEntity<?> saveUser(@RequestBody UserModel user) throws Exception {
         return ResponseEntity.ok(userDetailsService.save(user));
     }
 

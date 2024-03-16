@@ -1,43 +1,25 @@
 package io.Adrestus.Backend.Service;
 
-import io.Adrestus.Backend.Repository.KVRepository;
-import io.Adrestus.Backend.payload.response.ResponseDao;
-import io.Adrestus.bloom_filter.core.BloomObject;
-import io.Adrestus.core.Transaction;
-import org.springframework.beans.factory.annotation.Qualifier;
+import io.Adrestus.Backend.Repository.TransactionRepository;
+import io.Adrestus.Backend.model.BlockModel;
+import io.Adrestus.Backend.model.TransactionModel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-
 
 @Service
 public class TransactionService {
-    private final KVRepository KVRepository;
 
-    public TransactionService(@Qualifier("transactionDao") KVRepository KVRepository) {
-        this.KVRepository = KVRepository;
-    }
+    @Autowired
+    private TransactionRepository transactionRepository;
 
-    public String addTransaction(Transaction transaction) {
-        return this.KVRepository.addTransaction(transaction);
-    }
 
-    public int updateTransactionByAddress(String from, Transaction transaction) {
-        return this.KVRepository.updateTransactionByAddress(from, transaction);
+    public void save(TransactionModel transactionModel){
+        transactionRepository.save(transactionModel);
     }
 
-    public ResponseDao getTransactionsByAddress(String address) {
-        return this.KVRepository.getTransactionsByAddress(address);
+    public TransactionModel findByTransactionhash(String transactionHash){
+        TransactionModel d= this.transactionRepository.findByTransactionhash(transactionHash);
+        return this.transactionRepository.findByTransactionhash(transactionHash);
     }
 
-    public HashMap<String, ResponseDao> getTransactionsByBloomFilter(BloomObject bloomObject) {
-        return this.KVRepository.getTransactionsByBloomFilter(bloomObject);
-    }
-
-    public  HashMap<String, String>getTransactionsBalance(BloomObject bloomObject,String zone) {
-        return this.KVRepository.getTransactionsBalance(bloomObject,zone);
-    }
-    public int deleteALL() {
-        return this.KVRepository.deleteALL();
-    }
 }

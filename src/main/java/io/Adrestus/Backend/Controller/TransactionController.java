@@ -1,6 +1,6 @@
 package io.Adrestus.Backend.Controller;
 
-import io.Adrestus.Backend.Service.TransactionService;
+import io.Adrestus.Backend.Service.TransactionWalletService;
 import io.Adrestus.Backend.payload.response.ResponseDao;
 import io.Adrestus.bloom_filter.core.BloomObject;
 import io.Adrestus.core.Transaction;
@@ -15,37 +15,37 @@ import java.util.HashMap;
 @RestController
 public class TransactionController {
     @Autowired
-    private final TransactionService transactionService;
+    private final TransactionWalletService transactionWalletService;
 
     @Autowired
-    public TransactionController(TransactionService transactionService) {
-        this.transactionService = transactionService;
+    public TransactionController(TransactionWalletService transactionWalletService) {
+        this.transactionWalletService = transactionWalletService;
     }
 
 
     @PostMapping
     public @ResponseBody String addTransaction(@RequestBody Transaction transaction) {
-        return this.transactionService.addTransaction(transaction);
+        return this.transactionWalletService.addTransaction(transaction);
     }
 
     @GetMapping(path = {"{from}"})
     public @ResponseBody ResponseDao getTransactionsByAddress(@RequestBody @PathVariable("from") String address) {
-        return this.transactionService.getTransactionsByAddress(address);
+        return this.transactionWalletService.getTransactionsByAddress(address);
     }
 
     @PostMapping(value = "/bloom_filter")
     public @ResponseBody HashMap<String, ResponseDao> getTransactionsByBloomFilter(@RequestBody BloomObject bloomObject) {
-        return this.transactionService.getTransactionsByBloomFilter(bloomObject);
+        return this.transactionWalletService.getTransactionsByBloomFilter(bloomObject);
     }
 
     @PutMapping(path = {"{from}"})
     public @ResponseBody int updateTransactionByAddress(@RequestBody @PathVariable("from") String hash, @RequestBody Transaction transaction) {
-        return this.transactionService.updateTransactionByAddress(hash, transaction);
+        return this.transactionWalletService.updateTransactionByAddress(hash, transaction);
     }
 
     @GetMapping(path = {"/delete"})
     public @ResponseBody int deleteALL() {
-        return this.transactionService.deleteALL();
+        return this.transactionWalletService.deleteALL();
     }
 
 }

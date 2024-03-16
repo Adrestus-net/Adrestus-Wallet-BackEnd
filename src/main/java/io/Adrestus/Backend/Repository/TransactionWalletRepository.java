@@ -6,7 +6,7 @@ import io.Adrestus.core.Transaction;
 
 import java.util.HashMap;
 
-public interface KVRepository {
+public interface TransactionWalletRepository {
 
     public String addTransaction(Transaction transaction);
 
