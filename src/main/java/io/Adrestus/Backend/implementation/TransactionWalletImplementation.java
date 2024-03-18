@@ -1,27 +1,29 @@
 package io.Adrestus.Backend.implementation;
 
-import com.google.common.reflect.TypeToken;
 import io.Adrestus.Backend.DTO.TransactionDetailsDTO;
 import io.Adrestus.Backend.MemoryBuffer.AddressMemoryInstance;
 import io.Adrestus.Backend.Repository.TransactionWalletRepository;
 import io.Adrestus.Backend.Service.AccountService;
+import io.Adrestus.Backend.Service.AccountStateService;
 import io.Adrestus.Backend.Service.TransactionService;
-import io.Adrestus.Backend.Util.TransactionConverter;
-import io.Adrestus.Backend.model.TransactionModel;
+import io.Adrestus.Backend.Util.TransactionConverterUtil;
 import io.Adrestus.Backend.payload.response.ResponseDao;
 import io.Adrestus.MemoryTreePool;
+import io.Adrestus.TreeFactory;
 import io.Adrestus.Trie.PatriciaTreeNode;
 import io.Adrestus.bloom_filter.core.BloomObject;
 import io.Adrestus.config.APIConfiguration;
 import io.Adrestus.core.Transaction;
-import io.Adrestus.mapper.MemoryTreePoolSerializer;
-import io.Adrestus.util.SerializationUtil;
-import io.distributedLedger.*;
+import io.Adrestus.core.TransactionBlock;
+import io.distributedLedger.DatabaseFactory;
+import io.distributedLedger.DatabaseType;
+import io.distributedLedger.IDatabase;
+import io.distributedLedger.ZoneDatabaseFactory;
 import io.vavr.control.Option;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.lang.reflect.Type;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,30 +33,26 @@ import java.util.Optional;
 @Repository("transactionDao")
 public class TransactionWalletImplementation implements TransactionWalletRepository {
 
-    private static List<Transaction> memorydb = new ArrayList<>();
-    private IDatabase<String, LevelDBTransactionWrapper<Transaction>> database;
-    private final SerializationUtil patricia_tree_wrapper;
+
+    @Autowired
+    private AccountStateService accountStateService;
 
     @Autowired
     private AccountService accountService;
 
-    public TransactionWalletImplementation() {
-        Type fluentType = new TypeToken<MemoryTreePool>() {
-        }.getType();
-        List<SerializationUtil.Mapping> list = new ArrayList<>();
-        list.add(new SerializationUtil.Mapping(MemoryTreePool.class, ctx -> new MemoryTreePoolSerializer()));
-        List<SerializationUtil.Mapping> list2 = new ArrayList<>();
-        this.patricia_tree_wrapper = new SerializationUtil<>(fluentType, list);
-        this.database = new DatabaseFactory(String.class, Transaction.class, new TypeToken<LevelDBTransactionWrapper<Transaction>>() {
-        }.getType()).getDatabase(DatabaseType.LEVEL_DB);
-    }
+    @Autowired
+    private TransactionService transactionService;
+
 
     @Override
     public String addTransaction(Transaction transaction) {
         AddressMemoryInstance.getInstance().getMemory().add(transaction.getFrom());
         AddressMemoryInstance.getInstance().getMemory().add(transaction.getTo());
-        database.save(transaction.getFrom(), transaction);
-        database.save(transaction.getTo(), transaction);
+        TransactionBlock transactionBlock = new TransactionBlock();
+        transactionBlock.setHash("blockhash0");
+        transactionBlock.setHeight(100);
+        transactionBlock.getHeader().setTimestamp(new Timestamp(System.currentTimeMillis()).toString());
+        transactionService.save(TransactionConverterUtil.convert(transaction, transactionBlock));
 //        MessageListener messageListener = new MessageListener();
 //        Strategy transactionStrategy = new Strategy(new TransactionStrategy(transaction, messageListener));
 //        transactionStrategy.SendTransactionSync();
@@ -64,34 +62,18 @@ public class TransactionWalletImplementation implements TransactionWalletReposit
     }
 
     @Override
-    public int updateTransactionByAddress(String from, Transaction transaction) {
-        database.save(transaction.getFrom(), transaction);
-        database.save(transaction.getTo(), transaction);
-        return 1;
-    }
-
-    @Override
     public ResponseDao getTransactionsByAddress(String address) {
         ArrayList<Transaction> from = new ArrayList<>();
         ArrayList<Transaction> to = new ArrayList<>();
-        List<TransactionDetailsDTO> fromModel=accountService.findTransactionsByFromAddress(address);
-        List<TransactionDetailsDTO> toModel=accountService.findTransactionsByToAddress(address);
-        fromModel.stream().forEach(val->from.add(TransactionConverter.convert(val)));
-        toModel.stream().forEach(val->to.add(TransactionConverter.convert(val)));
+        List<TransactionDetailsDTO> fromModel = transactionService.findTransactionsByFromAddress(address);
+        List<TransactionDetailsDTO> toModel = transactionService.findTransactionsByToAddress(address);
+        fromModel.stream().forEach(val -> from.add(TransactionConverterUtil.convert(val)));
+        toModel.stream().forEach(val -> to.add(TransactionConverterUtil.convert(val)));
         return new ResponseDao(from, to);
-//        Optional<LevelDBTransactionWrapper<Transaction>> wrapper = database.findByKey(address);
-//        if (wrapper.isPresent()) {
-//            ArrayList<Transaction> from = new ArrayList<>();
-//            ArrayList<Transaction> to = new ArrayList<>();
-//            wrapper.get().getFrom().stream().forEach(val -> from.add(val));
-//            wrapper.get().getTo().stream().forEach(val -> to.add(val));
-//            return new ResponseDao(from, to);
-//        }
-//        return null;
     }
 
     @Override
-    public HashMap<String, String> getTransactionsBalance(BloomObject bloomObject,String zone) {
+    public HashMap<String, String> getTransactionsBalance(BloomObject bloomObject, String zone) {
         HashMap<String, String> map = new HashMap<>();
         if (bloomObject == null) {
             return map;
@@ -106,7 +88,7 @@ public class TransactionWalletImplementation implements TransactionWalletReposit
         Optional<byte[]> tree = tree_database.seekLast();
         if (tree.isEmpty())
             return map;
-        MemoryTreePool memoryTreePool = (MemoryTreePool) patricia_tree_wrapper.decode(tree.get());
+        MemoryTreePool memoryTreePool = (MemoryTreePool) TreeFactory.getMemoryTree(Integer.valueOf(zone));
         buffer.stream().forEach(address -> {
             Option<PatriciaTreeNode> res = memoryTreePool.getByaddress(address);
             if (res.isEmpty()) {
@@ -120,6 +102,7 @@ public class TransactionWalletImplementation implements TransactionWalletReposit
 
     @Override
     public HashMap<String, ResponseDao> getTransactionsByBloomFilter(BloomObject bloomObject) {
+
         HashMap<String, ResponseDao> map = new HashMap<>();
         List<String> buffer = AddressMemoryInstance.getInstance().getMemory().contains(bloomObject);
         buffer.stream().forEach(val -> {
@@ -128,9 +111,4 @@ public class TransactionWalletImplementation implements TransactionWalletReposit
         return map;
     }
 
-    @Override
-    public int deleteALL() {
-        database.erase_db();
-        return 0;
-    }
 }

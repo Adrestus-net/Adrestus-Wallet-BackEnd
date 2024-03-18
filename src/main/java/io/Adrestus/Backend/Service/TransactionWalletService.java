@@ -22,10 +22,6 @@ public class TransactionWalletService {
         return this.TransactionRepository.addTransaction(transaction);
     }
 
-    public int updateTransactionByAddress(String from, Transaction transaction) {
-        return this.TransactionRepository.updateTransactionByAddress(from, transaction);
-    }
-
     public ResponseDao getTransactionsByAddress(String address) {
         return this.TransactionRepository.getTransactionsByAddress(address);
     }
@@ -34,10 +30,7 @@ public class TransactionWalletService {
         return this.TransactionRepository.getTransactionsByBloomFilter(bloomObject);
     }
 
-    public  HashMap<String, String>getTransactionsBalance(BloomObject bloomObject,String zone) {
-        return this.TransactionRepository.getTransactionsBalance(bloomObject,zone);
-    }
-    public int deleteALL() {
-        return this.TransactionRepository.deleteALL();
+    public HashMap<String, String> getTransactionsBalance(BloomObject bloomObject, String zone) {
+        return this.TransactionRepository.getTransactionsBalance(bloomObject, zone);
     }
 }

@@ -16,7 +16,7 @@ public class BalanceController {
     private TransactionWalletService transactionWalletService;
 
     @RequestMapping(value = "{zone}", method = RequestMethod.POST)
-    public @ResponseBody HashMap<String, String> createAuthenticationToken(@RequestBody BloomObject bloomObject,@RequestBody @PathVariable("zone") String zone) {
-        return transactionWalletService.getTransactionsBalance(bloomObject,zone);
+    public @ResponseBody HashMap<String, String> createAuthenticationToken(@RequestBody BloomObject bloomObject, @RequestBody @PathVariable("zone") String zone) {
+        return transactionWalletService.getTransactionsBalance(bloomObject, zone);
     }
 }

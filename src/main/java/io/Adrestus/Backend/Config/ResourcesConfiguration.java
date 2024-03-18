@@ -1,28 +1,31 @@
 package io.Adrestus.Backend.Config;
 
-import com.google.common.reflect.TypeToken;
 import io.Adrestus.Backend.MemoryBuffer.AddressMemoryInstance;
-import io.Adrestus.core.Transaction;
-import io.distributedLedger.DatabaseFactory;
-import io.distributedLedger.DatabaseType;
-import io.distributedLedger.IDatabase;
-import io.distributedLedger.LevelDBTransactionWrapper;
-import lombok.SneakyThrows;
-import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
+import io.Adrestus.Backend.Repository.AccountRepository;
+import io.Adrestus.Backend.model.AccountModel;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@Component
-public class ResourcesConfiguration implements ApplicationListener<ApplicationEnvironmentPreparedEvent> {
-    private final IDatabase<String, LevelDBTransactionWrapper<Transaction>> transaction_database;
+import java.util.List;
+import java.util.TreeSet;
 
-    public ResourcesConfiguration() {
-        transaction_database = new DatabaseFactory(String.class, Transaction.class, new TypeToken<LevelDBTransactionWrapper<Transaction>>() {
-        }.getType()).getDatabase(DatabaseType.LEVEL_DB);
-    }
+@Configuration
+@EnableJpaRepositories("io.Adrestus.Backend.Repository")
+public class ResourcesConfiguration {
 
-    @SneakyThrows
-    public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
-        AddressMemoryInstance.getInstance().setMemory(transaction_database.retrieveAllKeys());
+    @Autowired
+    private AccountRepository accountRepository;
+
+
+    @Bean
+    public int StartCachingAddress() {
+        List<AccountModel> accounts = accountRepository.findAllActiveAccounts();
+        TreeSet<String> treeSet = new TreeSet<>();
+        accounts.stream().forEach(val -> treeSet.add(val.getAddress()));
+        treeSet.add("ADR-GD3G-DK4I-DKM2-IQSB-KBWL-HWRV-BBQA-MUAS-MGXA-5QPP");
+        AddressMemoryInstance.getInstance().setMemory(treeSet);
+        return 0;
     }
 }

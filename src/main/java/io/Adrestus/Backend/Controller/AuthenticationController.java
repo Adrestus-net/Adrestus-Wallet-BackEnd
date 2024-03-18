@@ -1,7 +1,7 @@
 package io.Adrestus.Backend.Controller;
 
 import io.Adrestus.Backend.Service.CustomUserDetailsService;
-import io.Adrestus.Backend.Util.JwtUtil;
+import io.Adrestus.Backend.Util.JwtTokenUtil;
 import io.Adrestus.Backend.model.UserModel;
 import io.Adrestus.Backend.payload.request.AuthenticationRequest;
 import io.Adrestus.Backend.payload.response.AuthenticationResponse;
@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @CrossOrigin
 @RestController
+///api/v1/auth/**
 public class AuthenticationController {
 
     @Autowired
@@ -34,7 +35,7 @@ public class AuthenticationController {
     private CustomUserDetailsService userDetailsService;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtTokenUtil jwtTokenUtil;
 
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest)
@@ -49,7 +50,7 @@ public class AuthenticationController {
         }
 
         UserDetails userdetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
-        AuthenticationResponse token = jwtUtil.generateToken(userdetails);
+        AuthenticationResponse token = jwtTokenUtil.generateToken(userdetails);
         return ResponseEntity.ok(token);
     }
 
@@ -63,7 +64,7 @@ public class AuthenticationController {
         // From the HttpRequest get the claims
         DefaultClaims claims = (DefaultClaims) request.getAttribute("claims");
         Map<String, Object> expectedMap = getMapFromIoJsonwebtokenClaims(claims);
-        AuthenticationResponse token = jwtUtil.doGenerateRefreshToken(expectedMap, expectedMap.get("sub").toString());
+        AuthenticationResponse token = jwtTokenUtil.doGenerateRefreshToken(expectedMap, expectedMap.get("sub").toString());
         return ResponseEntity.ok(token);
     }
 

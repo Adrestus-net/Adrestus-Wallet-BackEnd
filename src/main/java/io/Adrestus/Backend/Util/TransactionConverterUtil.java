@@ -11,7 +11,7 @@ import lombok.SneakyThrows;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
-public class TransactionConverter {
+public class TransactionConverterUtil {
 
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
 

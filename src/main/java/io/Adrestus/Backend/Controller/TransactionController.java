@@ -38,14 +38,4 @@ public class TransactionController {
         return this.transactionWalletService.getTransactionsByBloomFilter(bloomObject);
     }
 
-    @PutMapping(path = {"{from}"})
-    public @ResponseBody int updateTransactionByAddress(@RequestBody @PathVariable("from") String hash, @RequestBody Transaction transaction) {
-        return this.transactionWalletService.updateTransactionByAddress(hash, transaction);
-    }
-
-    @GetMapping(path = {"/delete"})
-    public @ResponseBody int deleteALL() {
-        return this.transactionWalletService.deleteALL();
-    }
-
 }

@@ -1,7 +1,6 @@
 package io.Adrestus.Backend;
 
 import io.Adrestus.Backend.Config.NetworkConfiguration;
-import io.Adrestus.Backend.Config.ResourcesConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -25,7 +24,22 @@ public class App {
         props.put("server.port", "8080");*/
         SpringApplication app = new SpringApplication(App.class);
         app.addListeners(new NetworkConfiguration());
-        app.addListeners(new ResourcesConfiguration());
+        //app.addListeners(new ResourcesConfiguration());
         app.run(args);
     }
+//    @Bean
+//    public WebMvcConfigurer corsConfigurer() {
+//        return new WebMvcConfigurer() {
+//            @Override
+//            public void addCorsMappings(CorsRegistry registry) {
+//                registry.addMapping("/**")
+//                        .allowedOrigins("http://localhost:3000/")
+//                        .allowCredentials(true)
+//                        .maxAge(3600)
+//                        .allowedHeaders("Accept", "Content-Type", "Origin", "Authorization", "X-Auth-Token")
+//                        .exposedHeaders("X-Auth-Token", "Authorization")
+//                        .allowedMethods("POST", "GET", "DELETE", "PUT", "OPTIONS");
+//            }
+//        };
+//    }
 }

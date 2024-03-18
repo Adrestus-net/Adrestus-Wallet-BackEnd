@@ -10,13 +10,10 @@ public interface TransactionWalletRepository {
 
     public String addTransaction(Transaction transaction);
 
-    public int updateTransactionByAddress(String hash, Transaction transaction);
-
     public ResponseDao getTransactionsByAddress(String address);
 
-    public  HashMap<String, String> getTransactionsBalance(BloomObject bloomObject,String zone);
+    public HashMap<String, String> getTransactionsBalance(BloomObject bloomObject, String zone);
 
     public HashMap<String, ResponseDao> getTransactionsByBloomFilter(BloomObject bloomObject);
 
-    public int deleteALL();
 }

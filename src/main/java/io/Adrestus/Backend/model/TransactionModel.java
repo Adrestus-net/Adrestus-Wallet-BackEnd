@@ -1,8 +1,6 @@
 package io.Adrestus.Backend.model;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,8 +25,8 @@ public class TransactionModel {
     @Column(name = "to", nullable = false)
     private String to;
 
-    @ManyToOne(fetch=FetchType.EAGER)
-    @JoinColumn(name="block_hash")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "block_hash")
     private BlockModel blockModel;
 
 

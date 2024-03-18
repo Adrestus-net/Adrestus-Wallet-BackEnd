@@ -1,7 +1,7 @@
 package io.Adrestus.Backend.Config;
 
 import io.Adrestus.Backend.Service.JwtUserDetailsService;
-import io.Adrestus.Backend.Util.JwtUtil;
+import io.Adrestus.Backend.Util.JwtTokenUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -24,7 +24,7 @@ public class CustomJwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
     @Autowired
-    private JwtUtil jwtTokenUtil;
+    private JwtTokenUtil jwtTokenUtil;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -34,10 +34,11 @@ public class CustomJwtAuthenticationFilter extends OncePerRequestFilter {
             // JWT Token is in the form "Bearer token". Remove Bearer word and
             // get  only the Token
             String jwtToken = extractJwtFromRequest(request);
-
-            if (StringUtils.hasText(jwtToken) && jwtTokenUtil.validateToken(jwtToken)) {
+            if (StringUtils.hasText(jwtToken)) {
                 UserDetails userDetails = jwtUserDetailsService.loadUserDetails(jwtTokenUtil.getUsernameFromToken(jwtToken));
-
+                if (!jwtTokenUtil.isTokenValid(jwtToken, userDetails)) {
+                    throw new IllegalArgumentException("User of this Token is not valid probably not registered in database");
+                }
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
                 // After setting the Authentication in the context, we specify
                 // that the current user is authenticated. So it passes the

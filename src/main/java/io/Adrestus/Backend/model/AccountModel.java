@@ -1,10 +1,11 @@
 package io.Adrestus.Backend.model;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,37 +15,38 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AccountModel {
+public class AccountModel implements Serializable {
+
+    @Column(name = "accountId")
+    private Long accountId;
+
     @Id
+    @Column(name = "address", nullable = false)
     private String address;
 
-    @Column(name = "balance", nullable = false)
-    private double balance;
+    @Column(name = "timestamp", nullable = false)
+    private Timestamp timestamp;
 
-    @Column(name = "staked", nullable = false)
-    private double staked;
+    @OneToMany(mappedBy = "accountModel")
+    @ToString.Exclude
+    @JsonIgnore
+    private List<AccountStateModel> accountStateModels;
 
-//    @OneToMany(mappedBy = "account")
-//    @ToString.Exclude
-//    @JsonIgnore
-//    private List<TransactionModel> transactions;
-
-    public double getBalance() {
-        return balance;
+    public Long getAccountId() {
+        return accountId;
     }
 
-    public void setBalance(double balance) {
-        this.balance = balance;
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
     }
 
-    public double getStaked() {
-        return staked;
+    public List<AccountStateModel> getAccountStateModels() {
+        return accountStateModels;
     }
 
-    public void setStaked(double staked) {
-        this.staked = staked;
+    public void setAccountStateModels(List<AccountStateModel> accountStateModels) {
+        this.accountStateModels = accountStateModels;
     }
-
 
     public String getAddress() {
         return address;
@@ -54,25 +56,33 @@ public class AccountModel {
         this.address = address;
     }
 
+    public Timestamp getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Timestamp timestamp) {
+        this.timestamp = timestamp;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AccountModel that = (AccountModel) o;
-        return Double.compare(balance, that.balance) == 0 && Double.compare(staked, that.staked) == 0 && Objects.equals(address, that.address);
+        return Objects.equals(accountId, that.accountId) && Objects.equals(address, that.address) && Objects.equals(timestamp, that.timestamp) && Objects.equals(accountStateModels, that.accountStateModels);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(address, balance, staked);
+        return Objects.hash(accountId, address, timestamp, accountStateModels);
     }
 
     @Override
     public String toString() {
         return "AccountModel{" +
-                "Address='" + address + '\'' +
-                ", balance=" + balance +
-                ", staked=" + staked +
+                "accountId=" + accountId +
+                ", address='" + address + '\'' +
+                ", timestamp=" + timestamp +
                 '}';
     }
 }

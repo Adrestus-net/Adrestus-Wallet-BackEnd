@@ -36,7 +36,7 @@ public class AddressMemoryPoll implements IAddressMemoryPoll {
     public List<String> contains(BloomObject bloomObject) {
         BloomFilter<String> match_filter = new InMemoryBloomFilter<String>(bloomObject.getNumBitsRequired(), bloomObject.getHashFunctionNum(), bloomObject.getArray(), null);
         List<String> buffer = new ArrayList<String>(AddressMemoryInstance.getInstance().getMemory().getResources());
-        List<Integer>toDelete=new ArrayList<>();
+        List<Integer> toDelete = new ArrayList<>();
 
         for (int i = 0; i < buffer.size(); i++) {
             if (!match_filter.contains(buffer.get(i))) {

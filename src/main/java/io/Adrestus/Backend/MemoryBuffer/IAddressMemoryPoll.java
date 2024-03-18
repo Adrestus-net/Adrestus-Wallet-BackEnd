@@ -14,6 +14,7 @@ public interface IAddressMemoryPoll {
     public String[] retrieveAll();
 
     public List<String> contains(BloomObject bloomObject);
+
     public TreeSet<String> getResources();
 
     public int size();

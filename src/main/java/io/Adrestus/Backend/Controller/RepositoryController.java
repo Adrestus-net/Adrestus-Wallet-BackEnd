@@ -1,8 +1,10 @@
 package io.Adrestus.Backend.Controller;
 
 
+import io.Adrestus.Backend.DTO.AccountDetailsDTO;
 import io.Adrestus.Backend.DTO.TransactionDetailsDTO;
 import io.Adrestus.Backend.Service.AccountService;
+import io.Adrestus.Backend.Service.AccountStateService;
 import io.Adrestus.Backend.Service.BlockService;
 import io.Adrestus.Backend.Service.TransactionService;
 import io.Adrestus.Backend.model.AccountModel;
@@ -21,25 +23,34 @@ import java.util.List;
 @RequestMapping("/api/v1/explorer")
 public class RepositoryController {
     @Autowired
+    private AccountStateService accountStateService;
+
+    @Autowired
     private AccountService accountService;
     @Autowired
     private BlockService blockService;
     @Autowired
     private TransactionService transactionService;
 
+
     @GetMapping("/account/{address}")
     public @ResponseBody AccountModel getAccountByAddress(@PathVariable("address") String address) {
-        return this.accountService.findByAddress(address);
+        return this.accountService.findAccountByAddress(address);
     }
 
     @GetMapping("/transactionsByFromAddress/{address}")
     public @ResponseBody List<TransactionDetailsDTO> getTransactionsByFromAddress(@PathVariable("address") String address) {
-        return this.accountService.findTransactionsByFromAddress(address);
+        return this.transactionService.findTransactionsByFromAddress(address);
     }
 
     @GetMapping("/transactionsByToAddress/{address}")
     public @ResponseBody List<TransactionDetailsDTO> getTransactionsByToAddress(@PathVariable("address") String address) {
-        return this.accountService.findTransactionsByToAddress(address);
+        return this.transactionService.findTransactionsByToAddress(address);
+    }
+
+    @GetMapping("/TotalAccountBalanceByAddressZone/{address}")
+    public @ResponseBody List<AccountDetailsDTO> findTotalAccountBalanceByAddressZone(@PathVariable("address") String address) {
+        return this.accountStateService.findTotalAccountBalanceByAddressZone(address);
     }
 
     @GetMapping("/transactionsByHash/{hash}")
