@@ -32,7 +32,7 @@ and experiences but also security, transparency, and community involvement.
 
 - Make sure you start the mysql database with docker there is exist a docker compose.yml file
   ```
-  cd frontend-react-basic-app/
+  cd Adrestus-Wallet-Backend/
   sudo docker compose up
   ```
 - Make sure maven is installed
