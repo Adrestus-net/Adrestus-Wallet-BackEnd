@@ -67,7 +67,7 @@ public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter im
                 //.authorizeRequests().antMatchers("/websocket-explorer").permitAll().and()
                 .authorizeRequests()
                 .antMatchers("/websocket-explorer/**").permitAll()
-                .antMatchers("/authenticate", "/register").permitAll()
+                .antMatchers("/api/v1/auth/**").permitAll()
                 .antMatchers("/api/v1/explorer/**").permitAll()
                 .anyRequest().authenticated().and()
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)

@@ -18,6 +18,10 @@ public class BlockService {
         blockRepository.save(blockModel);
     }
 
+    public void saveAll(List<BlockModel> blockModel) {
+        blockRepository.saveAll(blockModel);
+    }
+
     public BlockModel findByBlockhash(String BlockHash) {
         return blockRepository.findByBlockhash(BlockHash);
     }

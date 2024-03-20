@@ -17,12 +17,16 @@ public class AccountService {
         accountRepository.save(entity);
     }
 
+    public void saveAll(List<AccountModel> entity) {
+        accountRepository.saveAll(entity);
+    }
+
     public List<AccountModel> findAllActiveAccounts() {
         return this.accountRepository.findAll();
     }
 
-    public AccountModel findByAccountId(String address) {
-        return this.accountRepository.findByAccountId(address);
+    public AccountModel findByAddress(String address) {
+        return this.accountRepository.findByAddress(address);
     }
 
     public AccountModel findAccountByAddress(String address) {

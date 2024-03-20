@@ -7,11 +7,20 @@ import java.util.Objects;
 
 @Embeddable
 public final class AccountStateObject implements Serializable {
-    @Column(name = "accountId", nullable = false)
-    private Long accountId;
+    @Column(name = "address", nullable = false)
+    private String address;
     @Column(name = "zoneid", nullable = false)
     private int zoneId;
 
+
+    public AccountStateObject() {
+    }
+
+
+    public AccountStateObject(String address, int zoneId) {
+        this.address = address;
+        this.zoneId = zoneId;
+    }
 
     public int getZoneId() {
         return zoneId;
@@ -22,12 +31,12 @@ public final class AccountStateObject implements Serializable {
     }
 
 
-    public Long getAccountId() {
-        return accountId;
+    public String getAddress() {
+        return address;
     }
 
-    public void setAccountId(Long accountId) {
-        this.accountId = accountId;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     @Override
@@ -35,18 +44,18 @@ public final class AccountStateObject implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AccountStateObject that = (AccountStateObject) o;
-        return zoneId == that.zoneId && Objects.equals(accountId, that.accountId);
+        return zoneId == that.zoneId && Objects.equals(address, that.address);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountId, zoneId);
+        return Objects.hash(address, zoneId);
     }
 
     @Override
     public String toString() {
         return "AccountStateObject{" +
-                "accountId=" + accountId +
+                "address='" + address + '\'' +
                 ", zoneId=" + zoneId +
                 '}';
     }

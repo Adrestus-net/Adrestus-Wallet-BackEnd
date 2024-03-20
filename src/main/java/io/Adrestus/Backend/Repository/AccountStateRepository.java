@@ -13,8 +13,8 @@ import java.util.List;
 @Repository
 public interface AccountStateRepository extends JpaRepository<AccountStateModel, Long> {
 
-    @Query(value = "SELECT * FROM user.account_state WHERE account_state.account_id= ?", nativeQuery = true)
-    AccountStateModel findByAccountStateObjectAccountId(Long accountId);
+    @Query(value = "SELECT * FROM user.account_state WHERE account_state.address= ?", nativeQuery = true)
+    AccountStateModel findByAccountStateObjectAccountAddress(String address);
 
     @Query(value = "SELECT * FROM user.account_state u", nativeQuery = true)
     List<AccountStateModel> findAllActiveAccounts();
@@ -26,10 +26,10 @@ public interface AccountStateRepository extends JpaRepository<AccountStateModel,
 
 
     @Query(value =
-            "SELECT account_state.account_id as accountId, accounts.address as address,SUM(balance) as balance, SUM(staked) as staked\n" +
+            "SELECT accounts.address as address,SUM(balance) as balance, SUM(staked) as staked\n" +
                     "FROM user.account_state\n" +
-                    "INNER JOIN user.accounts ON accounts.account_id=account_state.account_id\n" +
-                    "WHERE accounts.address = 'from0'\n" +
-                    "GROUP BY account_state.account_id;", nativeQuery = true)
+                    "INNER JOIN user.accounts ON accounts.address=account_state.address\n" +
+                    "WHERE accounts.address = ?\n" +
+                    "GROUP BY account_state.address;", nativeQuery = true)
     List<AccountDetailsDTO> findTotalAccountBalanceByAddressZone(String address);
 }

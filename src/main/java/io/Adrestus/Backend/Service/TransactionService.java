@@ -19,6 +19,10 @@ public class TransactionService {
         transactionRepository.save(transactionModel);
     }
 
+    public void saveAll(List<TransactionModel> transactionModel) {
+        transactionRepository.saveAll(transactionModel);
+    }
+
     public TransactionModel findByTransactionhash(String transactionHash) {
         return this.transactionRepository.findByTransactionhash(transactionHash);
     }

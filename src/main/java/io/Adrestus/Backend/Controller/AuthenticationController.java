@@ -25,7 +25,7 @@ import java.util.Map.Entry;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @CrossOrigin
 @RestController
-///api/v1/auth/**
+@RequestMapping("/api/v1/auth")
 public class AuthenticationController {
 
     @Autowired

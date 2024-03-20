@@ -18,9 +18,12 @@ public class AccountStateService {
         accountStateRepository.save(entity);
     }
 
+    public void saveAll(List<AccountStateModel> entity) {
+        accountStateRepository.saveAll(entity);
+    }
 
-    public AccountStateModel findByAccountStateObjectAccountId(Long accountId) {
-        return this.accountStateRepository.findByAccountStateObjectAccountId(accountId);
+    public AccountStateModel findByAccountStateObjectAccountAddress(String address) {
+        return this.accountStateRepository.findByAccountStateObjectAccountAddress(address);
     }
 
     public List<AccountStateModel> findAllActiveAccounts() {

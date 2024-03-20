@@ -26,7 +26,7 @@ public class AccountStateModel {
     private double staked;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "accountId", referencedColumnName = "accountId", insertable = false, updatable = false, nullable = false)
+    @JoinColumn(name = "address", referencedColumnName = "address", insertable = false, updatable = false, nullable = false)
     private AccountModel accountModel;
 //     @JoinColumn(name = "id",referencedColumnName = "id", updatable = false, nullable = false)
 //     private AccountModel accountModel;

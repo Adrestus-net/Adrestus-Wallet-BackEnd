@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface AccountRepository extends JpaRepository<AccountModel, Long> {
-    AccountModel findByAccountId(String accountId);
+    AccountModel findByAddress(String address);
 
     @Query(value = "SELECT * FROM user.accounts u", nativeQuery = true)
     List<AccountModel> findAllActiveAccounts();
@@ -21,6 +21,6 @@ public interface AccountRepository extends JpaRepository<AccountModel, Long> {
     @Query(value = "SELECT * FROM user.accounts WHERE accounts.Address IN :addresses", nativeQuery = true)
     List<AccountModel> findAccountByListOfAddresses(@Param("addresses") List<String> addresses);
 
-    @Query(value = "SELECT * FROM user.accounts ORDER BY accounts.timestamp DESC LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT * FROM user.accounts ORDER BY accounts.account_id DESC LIMIT 1", nativeQuery = true)
     AccountModel findLastAccountEntry();
 }
