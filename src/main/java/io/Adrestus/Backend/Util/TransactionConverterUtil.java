@@ -5,43 +5,52 @@ import io.Adrestus.Backend.model.BlockModel;
 import io.Adrestus.Backend.model.TransactionModel;
 import io.Adrestus.core.RegularTransaction;
 import io.Adrestus.core.Transaction;
-import io.Adrestus.core.TransactionBlock;
 import lombok.SneakyThrows;
+import org.apache.commons.codec.binary.Hex;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
+import java.math.BigInteger;
 
 public class TransactionConverterUtil {
-
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
-
 
     public static Transaction convert(TransactionDetailsDTO transactionDetailsDTO) {
         Transaction transaction = new RegularTransaction();
         transaction.setHash(transactionDetailsDTO.getTransaction_hash());
+        transaction.setType(transactionDetailsDTO.getTransactionType());
+        transaction.setStatus(transactionDetailsDTO.getStatusType());
+        transaction.setZoneFrom(transactionDetailsDTO.getZoneFrom());
+        transaction.setZoneTo(transactionDetailsDTO.getZoneTo());
+        transaction.setTimestamp(transactionDetailsDTO.getCreationDate());
         transaction.setFrom(transactionDetailsDTO.getFromAddress());
         transaction.setTo(transactionDetailsDTO.getToAddress());
-        return transaction;
-    }
-
-    public static Transaction convert(TransactionModel transactionModel) {
-        Transaction transaction = new RegularTransaction();
-        transaction.setHash(transactionModel.getTransactionhash());
-        transaction.setFrom(transactionModel.getFrom());
-        transaction.setTo(transactionModel.getTo());
+        transaction.setAmount(transactionDetailsDTO.getAmount());
+        transaction.setAmountWithTransactionFee(transactionDetailsDTO.getAmountWithTransactionFee());
+        transaction.setNonce(transactionDetailsDTO.getNonce());
+        transaction.setXAxis(new BigInteger(transactionDetailsDTO.getXAxis()));
+        transaction.setYAxis(new BigInteger(transactionDetailsDTO.getYAxis()));
         return transaction;
     }
 
     @SneakyThrows
-    public static TransactionModel convert(Transaction transaction, TransactionBlock transactionBlock) {
-        BlockModel blockModel = new BlockModel();
-        blockModel.setBlockhash(transactionBlock.getHash());
-        blockModel.setHeight(transactionBlock.getHeight());
-        blockModel.setTimestamp(new Timestamp(dateFormat.parse(transactionBlock.getHeader().getTimestamp()).getTime()));
+    public static TransactionModel convert(Transaction transaction, BlockModel blockModel) {
         TransactionModel transactionModel = new TransactionModel();
+        transactionModel.setTransactionhash(transaction.getHash());
+        transactionModel.setType(transaction.getType());
+        transactionModel.setStatus(transaction.getStatus());
+        transactionModel.setZoneFrom(transaction.getZoneFrom());
+        transactionModel.setZoneTo(transaction.getZoneTo());
+        transactionModel.setZoneFrom(transaction.getZoneFrom());
+        transactionModel.setTimestamp(transaction.getTimestamp());
         transactionModel.setFrom(transaction.getFrom());
         transactionModel.setTo(transaction.getTo());
-        transactionModel.setTransactionhash(transaction.getHash());
+        transactionModel.setAmount(transaction.getAmount());
+        transactionModel.setAmountWithTransactionFee(transaction.getAmountWithTransactionFee());
+        transactionModel.setNonce(transaction.getNonce());
+        transactionModel.setXAxis(transaction.getXAxis().toString());
+        transactionModel.setYAxis(transaction.getYAxis().toString());
+        transactionModel.setV(transaction.getSignature().getV());
+        transactionModel.setR(Hex.encodeHexString(transaction.getSignature().getR()));
+        transactionModel.setS(Hex.encodeHexString(transaction.getSignature().getS()));
+        transactionModel.setPub(Hex.encodeHexString(transaction.getSignature().getPub()));
         transactionModel.setBlockModel(blockModel);
         return transactionModel;
     }

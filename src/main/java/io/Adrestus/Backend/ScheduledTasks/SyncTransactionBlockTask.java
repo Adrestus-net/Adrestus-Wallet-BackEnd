@@ -3,7 +3,6 @@ package io.Adrestus.Backend.ScheduledTasks;
 
 import com.google.common.reflect.TypeToken;
 import io.Adrestus.Backend.Config.APIConfiguration;
-import io.Adrestus.Backend.MemoryBuffer.AddressMemoryInstance;
 import io.Adrestus.MemoryTreePool;
 import io.Adrestus.TreeFactory;
 import io.Adrestus.core.CommitteeBlock;
@@ -99,8 +98,7 @@ public class SyncTransactionBlockTask {
         CommitteeBlock committee = (CommitteeBlock) CachedLatestBlocks.getInstance().getCommitteeBlock().clone();
         List<String> new_ips = committee.getStructureMap().get(zone).values().stream().collect(Collectors.toList());
 
-        if (new_ips.isEmpty())
-            return;
+        if (new_ips.isEmpty()) return;
 
         int RPCTransactionZonePort = ZoneDatabaseFactory.getDatabaseRPCPort(zone);
         int RPCPatriciaTreeZonePort = ZoneDatabaseFactory.getDatabasePatriciaRPCPort(ZoneDatabaseFactory.getPatriciaTreeZoneInstance(zone));
@@ -161,8 +159,6 @@ public class SyncTransactionBlockTask {
             if (!blocks.isEmpty()) {
                 blocks.stream().forEach(transactionBlock -> {
                     transactionBlock.getTransactionList().stream().forEach(transaction -> {
-                        AddressMemoryInstance.getInstance().getMemory().add(transaction.getFrom());
-                        AddressMemoryInstance.getInstance().getMemory().add(transaction.getTo());
                         transaction_database.save(transaction.getFrom(), transaction);
                         transaction_database.save(transaction.getTo(), transaction);
                     });
@@ -226,9 +222,7 @@ public class SyncTransactionBlockTask {
             }
 
             List<String> finalPatriciaRootList = patriciaRootList;
-            Map<String, byte[]> toCollect = toSave.entrySet().stream()
-                    .filter(x -> !finalPatriciaRootList.contains(x.getKey()))
-                    .collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
+            Map<String, byte[]> toCollect = toSave.entrySet().stream().filter(x -> !finalPatriciaRootList.contains(x.getKey())).collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
             tree_database.saveAll(toCollect);
             byte[] current_tree = toCollect.get(String.valueOf(CachedLatestBlocks.getInstance().getTransactionBlock().getHeight()));
             if (current_tree == null) {

@@ -2,12 +2,9 @@ package io.Adrestus.Backend.Controller;
 
 import io.Adrestus.Backend.Service.TransactionWalletService;
 import io.Adrestus.Backend.payload.response.ResponseDao;
-import io.Adrestus.bloom_filter.core.BloomObject;
 import io.Adrestus.core.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
 
 
 @CrossOrigin
@@ -32,10 +29,4 @@ public class TransactionController {
     public @ResponseBody ResponseDao getTransactionsByAddress(@RequestBody @PathVariable("from") String address) {
         return this.transactionWalletService.getTransactionsByAddress(address);
     }
-
-    @PostMapping(value = "/bloom_filter")
-    public @ResponseBody HashMap<String, ResponseDao> getTransactionsByBloomFilter(@RequestBody BloomObject bloomObject) {
-        return this.transactionWalletService.getTransactionsByBloomFilter(bloomObject);
-    }
-
 }

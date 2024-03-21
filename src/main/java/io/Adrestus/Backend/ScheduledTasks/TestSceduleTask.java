@@ -69,7 +69,7 @@ public class TestSceduleTask {
     private BlockService blockService;
 
 
-    @Scheduled(fixedRate = APIConfiguration.TRANSACTION_BLOCK_RATE)
+    @Scheduled(fixedRate = APIConfiguration.TRANSACTION_TEST_BLOCK_RATE)
     public void test() throws InterruptedException, MnemonicException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
 
         TreeSet<String> addresses = new TreeSet<>();
@@ -82,11 +82,11 @@ public class TestSceduleTask {
         vk1 = new BLSPublicKey(sk1);
         ECDSASign ecdsaSign = new ECDSASign();
 
-        char[] mnemonic1 = "sample sail jungle learn general promote task puppy own conduct green affair ".toCharArray();
+        char[] mnemonic1 = "sample sail jungle learn general promote task puppy own conduct green affair".toCharArray();
         char[] mnemonic2 = "photo monitor cushion indicate civil witness orchard estate online favorite sustain extend".toCharArray();
-        char[] mnemonic3 = "initial car bulb nature animal honey learn awful grit arrow phrase entire ".toCharArray();
-        char[] mnemonic4 = "enrich pulse twin version inject horror village aunt brief magnet blush else ".toCharArray();
-        char[] passphrase = "p4ssphr4se".toCharArray();
+        char[] mnemonic3 = "initial car bulb nature animal honey learn awful grit arrow phrase entire".toCharArray();
+        char[] mnemonic4 = "enrich pulse twin version inject horror village aunt brief magnet blush else".toCharArray();
+        char[] passphrase = "12345678".toCharArray();
 
         Mnemonic mnem = new Mnemonic(Security.NORMAL, WordList.ENGLISH);
         byte[] key1 = mnem.createSeed(mnemonic1, passphrase);
@@ -106,7 +106,7 @@ public class TestSceduleTask {
         String adddress1 = WalletAddress.generate_address((byte) version, ecKeyPair1.getPublicKey());
         String adddress2 = WalletAddress.generate_address((byte) version, ecKeyPair2.getPublicKey());
         String adddress3 = WalletAddress.generate_address((byte) version, ecKeyPair3.getPublicKey());
-        String adddress4 = WalletAddress.generate_address((byte) version, ecKeyPair4.getPublicKey());
+        String adddress4 = "ADR-GC2I-WBAW-IKJE-BWFC-ML6T-BNOC-7XOU-IQ74-BJ5L-WP7G";
 
         BlockModel blockModel = new BlockModel();
         blockModel.setPreviousHash("blockhash" + (counter - 1));
@@ -187,7 +187,7 @@ public class TestSceduleTask {
         transactionModel3.setPub(ecKeyPair1.getPublicKey().toString());
 
         TransactionModel transactionModel4 = new TransactionModel();
-        transactionModel4.setFrom(adddress3);
+        transactionModel4.setFrom(adddress4);
         transactionModel4.setTo(adddress1);
         transactionModel4.setTransactionhash(HashUtil.sha256("trhash" + counter + "c"));
         transactionModel4.setBlockModel(blockModel);
@@ -202,10 +202,10 @@ public class TestSceduleTask {
         transactionModel4.setXAxis(ramdonBigInteger().toString());
         transactionModel4.setYAxis(ramdonBigInteger().toString());
         transactionModel4.setV((byte) 1);
-        ECDSASignatureData signatureData4 = ecdsaSign.secp256SignMessage(org.spongycastle.util.encoders.Hex.decode(transactionModel.getTransactionhash()), ecKeyPair3);
+        ECDSASignatureData signatureData4 = ecdsaSign.secp256SignMessage(org.spongycastle.util.encoders.Hex.decode(transactionModel.getTransactionhash()), ecKeyPair4);
         transactionModel4.setR(Hex.encodeHexString(signatureData4.getR()));
         transactionModel4.setS(Hex.encodeHexString(signatureData4.getS()));
-        transactionModel4.setPub(ecKeyPair3.getPublicKey().toString());
+        transactionModel4.setPub(ecKeyPair4.getPublicKey().toString());
 
         transactionModels.add(transactionModel);
         transactionModels.add(transactionModel1);

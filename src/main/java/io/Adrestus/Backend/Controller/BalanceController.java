@@ -1,11 +1,10 @@
 package io.Adrestus.Backend.Controller;
 
 import io.Adrestus.Backend.Service.TransactionWalletService;
-import io.Adrestus.bloom_filter.core.BloomObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
 
 @CrossOrigin
 @RequestMapping("api/v1/balance")
@@ -15,8 +14,8 @@ public class BalanceController {
     @Autowired
     private TransactionWalletService transactionWalletService;
 
-    @RequestMapping(value = "{zone}", method = RequestMethod.POST)
-    public @ResponseBody HashMap<String, String> createAuthenticationToken(@RequestBody BloomObject bloomObject, @RequestBody @PathVariable("zone") String zone) {
-        return transactionWalletService.getTransactionsBalance(bloomObject, zone);
+    @RequestMapping(value = "{address}/{zone}", method = RequestMethod.GET)
+    public ResponseEntity<String> createAuthenticationToken(@PathVariable("address") String address, @RequestBody @PathVariable("zone") String zone) {
+        return new ResponseEntity<String>(transactionWalletService.getAddressBalanceFromZone(address, zone), HttpStatus.OK);
     }
 }

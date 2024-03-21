@@ -21,54 +21,54 @@ public class TransactionModel {
     @Id
     private String transactionhash;
 
-    @Column(name = "transactionType", nullable = false)
+    @Column(name = "transaction_type", updatable = false, nullable = false)
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", updatable = false, nullable = false)
     @Enumerated(EnumType.STRING)
     private StatusType status;
 
-    @Column(name = "zoneFrom", nullable = false)
+    @Column(name = "zone_from", updatable = false, nullable = false)
     private int zoneFrom;
 
-    @Column(name = "ZoneTo", nullable = false)
+    @Column(name = "zone_to", updatable = false, nullable = false)
     private int ZoneTo;
 
-    @Column(name = "timestamp", nullable = false)
+    @Column(name = "timestamp", updatable = false, nullable = false)
     protected String timestamp;
 
-    @Column(name = "from", nullable = false)
+    @Column(name = "from", updatable = false, nullable = false)
     private String from;
 
-    @Column(name = "to", nullable = false)
+    @Column(name = "to", updatable = false, nullable = false)
     private String to;
 
-    @Column(name = "amount", nullable = false)
+    @Column(name = "amount", updatable = false, nullable = false)
     private double amount;
 
-    @Column(name = "amountWithTransactionFee", nullable = false)
+    @Column(name = "amount_with_transaction_fee", updatable = false, nullable = false)
     private double AmountWithTransactionFee;
 
-    @Column(name = "nonce", nullable = false)
+    @Column(name = "nonce", updatable = false, nullable = false)
     private int Nonce;
 
-    @Column(name = "XAxis", nullable = false)
+    @Column(name = "xaxis", updatable = false, nullable = false)
     protected String XAxis;
 
-    @Column(name = "YAxis", nullable = false)
+    @Column(name = "yaxis", updatable = false, nullable = false)
     protected String YAxis;
 
-    @Column(name = "v", nullable = false)
+    @Column(name = "v", updatable = false, nullable = false)
     private byte v;
 
-    @Column(name = "r", nullable = false)
+    @Column(name = "r", updatable = false, nullable = false)
     private String r;
 
-    @Column(name = "s", nullable = false)
+    @Column(name = "s", updatable = false, nullable = false)
     private String s;
 
-    @Column(name = "pub", nullable = false)
+    @Column(name = "pub", updatable = false, nullable = false)
     private String pub;
 
     @ManyToOne(fetch = FetchType.EAGER)

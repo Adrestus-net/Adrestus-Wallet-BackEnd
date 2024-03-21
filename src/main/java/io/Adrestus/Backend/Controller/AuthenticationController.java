@@ -61,11 +61,15 @@ public class AuthenticationController {
 
     @RequestMapping(value = "/refreshtoken", method = RequestMethod.POST)
     public ResponseEntity<?> refreshtoken(HttpServletRequest request) throws Exception {
-        // From the HttpRequest get the claims
-        DefaultClaims claims = (DefaultClaims) request.getAttribute("claims");
-        Map<String, Object> expectedMap = getMapFromIoJsonwebtokenClaims(claims);
-        AuthenticationResponse token = jwtTokenUtil.doGenerateRefreshToken(expectedMap, expectedMap.get("sub").toString());
-        return ResponseEntity.ok(token);
+        final String authorizationHeaderValue = request.getHeader("Authorization");
+        if (authorizationHeaderValue != null && authorizationHeaderValue.startsWith("Bearer")) {
+            String token = authorizationHeaderValue.substring(7, authorizationHeaderValue.length());
+            String username = jwtTokenUtil.getUsername(token);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            AuthenticationResponse refreshtoken = jwtTokenUtil.doGenerateRefreshToken(userDetails);
+            return ResponseEntity.ok(refreshtoken);
+        }
+        throw new IllegalArgumentException("Token is not valid please make sure you are registered and use a valid token");
     }
 
     public Map<String, Object> getMapFromIoJsonwebtokenClaims(DefaultClaims claims) {

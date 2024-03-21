@@ -64,6 +64,20 @@ public class JwtTokenUtil {
         return doGenerateToken(userDetails, claims, userDetails.getUsername());
     }
 
+    public ObjectAuthority getClaims(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+
+        Collection<? extends GrantedAuthority> roles = userDetails.getAuthorities();
+
+        if (roles.contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+            claims.put("isAdmin", true);
+        }
+        if (roles.contains(new SimpleGrantedAuthority("ROLE_USER"))) {
+            claims.put("isUser", true);
+        }
+        return new ObjectAuthority(claims, userDetails.getUsername());
+    }
+
     private AuthenticationResponse doGenerateToken(UserDetails userDetails, Map<String, Object> claims, String subject) {
         Algorithm algorithm = Algorithm.HMAC512(this.secret);
         if (isTimer) {
@@ -86,23 +100,24 @@ public class JwtTokenUtil {
         }
     }
 
-    public AuthenticationResponse doGenerateRefreshToken(Map<String, Object> extraClaims, String subject) {
+    public AuthenticationResponse doGenerateRefreshToken(UserDetails userDetails) {
+        ObjectAuthority objectAuthority = getClaims(userDetails);
         Algorithm algorithm = Algorithm.HMAC512(this.secret);
         if (isTimer) {
             isTimer = false;
             JWTCreator.Builder jwtBuilder = JWT.create()
-                    .withSubject(subject)
-                    .withIssuer(subject)
-                    .withClaim(extraClaims.entrySet().stream().findFirst().get().getKey(), true)
+                    .withSubject(objectAuthority.getSubject())
+                    .withIssuer(objectAuthority.getSubject())
+                    .withClaim(objectAuthority.getClaims().entrySet().stream().findFirst().get().getKey(), true)
                     .withIssuedAt(new Date(System.currentTimeMillis()))
                     .withExpiresAt(new Date(System.currentTimeMillis() + jwtExpirationInMs));
             // extraClaims.forEach(jwtBuilder::withClaim);
             return new AuthenticationResponse(jwtBuilder.sign(algorithm), jwtExpirationInMs);
         } else {
             JWTCreator.Builder jwtBuilder = JWT.create()
-                    .withSubject(subject)
-                    .withIssuer(subject)
-                    .withClaim(extraClaims.entrySet().stream().findFirst().get().getKey(), true)
+                    .withSubject(objectAuthority.getSubject())
+                    .withIssuer(objectAuthority.getSubject())
+                    .withClaim(objectAuthority.getClaims().entrySet().stream().findFirst().get().getKey(), true)
                     .withIssuedAt(new Date(System.currentTimeMillis()))
                     .withExpiresAt(new Date(System.currentTimeMillis() + jwtExpirationInMs));
             // extraClaims.forEach(jwtBuilder::withClaim);
@@ -167,5 +182,31 @@ public class JwtTokenUtil {
             throw ex;
         }
 
+    }
+
+    private final class ObjectAuthority {
+        private Map<String, Object> claims;
+        private String subject;
+
+        public ObjectAuthority(Map<String, Object> claims, String subject) {
+            this.claims = claims;
+            this.subject = subject;
+        }
+
+        public Map<String, Object> getClaims() {
+            return claims;
+        }
+
+        public void setClaims(Map<String, Object> claims) {
+            this.claims = claims;
+        }
+
+        public String getSubject() {
+            return subject;
+        }
+
+        public void setSubject(String subject) {
+            this.subject = subject;
+        }
     }
 }
