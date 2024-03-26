@@ -3,6 +3,12 @@ package io.Adrestus.Backend.ScheduledTasks;
 
 import com.google.common.reflect.TypeToken;
 import io.Adrestus.Backend.Config.APIConfiguration;
+import io.Adrestus.Backend.Service.AccountService;
+import io.Adrestus.Backend.Service.AccountStateService;
+import io.Adrestus.Backend.Service.BlockService;
+import io.Adrestus.Backend.Service.TransactionService;
+import io.Adrestus.Backend.Util.ConverterUtil;
+import io.Adrestus.Backend.model.*;
 import io.Adrestus.MemoryTreePool;
 import io.Adrestus.TreeFactory;
 import io.Adrestus.core.CommitteeBlock;
@@ -17,6 +23,8 @@ import io.distributedLedger.*;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +32,7 @@ import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -33,8 +42,26 @@ import java.util.stream.Collectors;
 
 @Component
 public class SyncTransactionBlockTask {
-    private static final SerializationUtil patricia_tree_wrapper;
+
+    @Autowired
+    @Lazy
+    private AccountStateService accountStateService;
+
+    @Autowired
+    @Lazy
+    private AccountService accountService;
+
+    @Autowired
+    @Lazy
+    private TransactionService transactionService;
+
+    @Autowired
+    @Lazy
+    private BlockService blockService;
+
     private static final Logger LOG = LoggerFactory.getLogger(SyncTransactionBlockTask.class);
+
+    private static final SerializationUtil patricia_tree_wrapper;
 
     static {
         Type fluentType = new TypeToken<MemoryTreePool>() {
@@ -44,7 +71,6 @@ public class SyncTransactionBlockTask {
         List<SerializationUtil.Mapping> list2 = new ArrayList<>();
         patricia_tree_wrapper = new SerializationUtil<>(fluentType, list);
     }
-
     @Scheduled(fixedRate = APIConfiguration.TRANSACTION_BLOCK_RATE)
     public void syncBlock() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(4);
@@ -116,10 +142,10 @@ public class SyncTransactionBlockTask {
 
         RpcAdrestusClient client = null;
         List<String> patriciaRootList = null;
+        ArrayList<TransactionModel>transactionModels=new ArrayList<>();
+        ArrayList<AccountModel>accountModels=new ArrayList<>();
+        ArrayList<AccountStateModel>accountStateModels=new ArrayList<>();
         try {
-            IDatabase<String, LevelDBTransactionWrapper<Transaction>> transaction_database = new DatabaseFactory(String.class, Transaction.class, new TypeToken<LevelDBTransactionWrapper<Transaction>>() {
-            }.getType()).getDatabase(DatabaseType.LEVEL_DB);
-            IDatabase<String, TransactionBlock> block_database = new DatabaseFactory(String.class, TransactionBlock.class).getDatabase(DatabaseType.ROCKS_DB, ZoneDatabaseFactory.getZoneInstance(zone));
             try {
                 client = new RpcAdrestusClient(new TransactionBlock(), toConnectTransaction, CachedEventLoop.getInstance().getEventloop());
                 client.connect();
@@ -127,15 +153,15 @@ public class SyncTransactionBlockTask {
                 LOG.info(e.toString());
                 return;
             }
-            Optional<TransactionBlock> block = block_database.seekLast();
-            Map<String, TransactionBlock> toSave = new HashMap<>();
+            BlockModel block = blockService.findLatestAddedBlockByTimestamp();
+            ArrayList<TransactionBlock>toSave=new ArrayList<>();
             List<TransactionBlock> blocks;
-            if (block.isPresent()) {
-                blocks = client.getBlocksList(String.valueOf(block.get().getHeight()));
+            if (block!=null) {
+                blocks = client.getBlocksList(String.valueOf(block.getHeight()));
                 if (!blocks.isEmpty() && blocks.size() > 1) {
                     patriciaRootList = new ArrayList<>(blocks.stream().filter(val -> val.getGeneration() > CachedLatestBlocks.getInstance().getCommitteeBlock().getGeneration()).map(TransactionBlock::getHash).collect(Collectors.toList()));
                     blocks.removeIf(x -> x.getGeneration() > CachedLatestBlocks.getInstance().getCommitteeBlock().getGeneration());
-                    blocks.stream().skip(1).forEach(val -> toSave.put(String.valueOf(val.getHeight()), val));
+                    blocks.stream().skip(1).forEach(val -> toSave.add(val));
                 }
 
             } else {
@@ -143,7 +169,7 @@ public class SyncTransactionBlockTask {
                 if (!blocks.isEmpty()) {
                     patriciaRootList = new ArrayList<>(blocks.stream().filter(val -> val.getGeneration() > CachedLatestBlocks.getInstance().getCommitteeBlock().getGeneration()).map(TransactionBlock::getHash).collect(Collectors.toList()));
                     blocks.removeIf(x -> x.getGeneration() > CachedLatestBlocks.getInstance().getCommitteeBlock().getGeneration());
-                    blocks.stream().forEach(val -> toSave.put(String.valueOf(val.getHeight()), val));
+                    blocks.stream().forEach(val -> toSave.add(val));
                 }
             }
 
@@ -154,19 +180,44 @@ public class SyncTransactionBlockTask {
                 }
                 return;
             }
-            block_database.saveAll(toSave);
-
+           ArrayList<BlockModel>blockModels= ConverterUtil.convert(toSave);
+           blockService.saveAll(blockModels);
             if (!blocks.isEmpty()) {
                 blocks.stream().forEach(transactionBlock -> {
                     transactionBlock.getTransactionList().stream().forEach(transaction -> {
-                        transaction_database.save(transaction.getFrom(), transaction);
-                        transaction_database.save(transaction.getTo(), transaction);
+                        Optional<BlockModel>blockModel=blockModels.stream().filter(val->val.getBlockhash().equals(transactionBlock.getHash())).findFirst();
+                        if(blockModel.isPresent()){
+                            transactionModels.add(ConverterUtil.convert(transaction,blockModel.get()));
+                            AccountModel accountModel1 = new AccountModel();
+                            accountModel1.setTimestamp(new Timestamp(System.currentTimeMillis()));
+                            accountModel1.setAddress(transaction.getFrom());
+                            AccountModel accountModel2 = new AccountModel();
+                            accountModel2.setTimestamp(new Timestamp(System.currentTimeMillis()));
+                            accountModel2.setAddress(transaction.getTo());
+                            accountModels.add(accountModel1);
+                            accountModels.add(accountModel2);
+                        }
+                        else{
+                            BlockModel blockModel1=ConverterUtil.convert(transactionBlock);
+                            blockService.save(blockModel1);
+                            transactionModels.add(ConverterUtil.convert(transaction,blockModel1));
+                            AccountModel accountModel1 = new AccountModel();
+                            accountModel1.setTimestamp(new Timestamp(System.currentTimeMillis()));
+                            accountModel1.setAddress(transaction.getFrom());
+                            AccountModel accountModel2 = new AccountModel();
+                            accountModel2.setTimestamp(new Timestamp(System.currentTimeMillis()));
+                            accountModel2.setAddress(transaction.getTo());
+                            accountModels.add(accountModel1);
+                            accountModels.add(accountModel2);
+                        }
                     });
                 });
                 CachedLatestBlocks.getInstance().setTransactionBlock(blocks.get(blocks.size() - 1));
                 LOG.info("Transaction Block Height: " + CachedLatestBlocks.getInstance().getTransactionBlock().getHeight());
                 LOG.info("Transaction List Height: " + CachedLatestBlocks.getInstance().getTransactionBlock().getTransactionList().size());
             }
+            transactionService.saveAll(transactionModels);
+            accountService.saveAll(accountModels);
 
             if (client != null) {
                 client.close();
@@ -179,20 +230,13 @@ public class SyncTransactionBlockTask {
 
 
         try {
-            IDatabase<String, byte[]> tree_database = new DatabaseFactory(String.class, byte[].class).getDatabase(DatabaseType.ROCKS_DB, ZoneDatabaseFactory.getPatriciaTreeZoneInstance(zone));
             client = new RpcAdrestusClient(new byte[]{}, toConnectPatricia, CachedEventLoop.getInstance().getEventloop());
             client.connect();
 
-            Optional<byte[]> tree = tree_database.seekLast();
-            List<byte[]> treeObjects;
-            if (tree.isPresent()) {
-                treeObjects = client.getPatriciaTreeList(((MemoryTreePool) patricia_tree_wrapper.decode(tree.get())).getHeight());
-            } else {
-                treeObjects = client.getPatriciaTreeList("");
-            }
+            List<byte[]>  treeObjects = client.getPatriciaTreeList(String.valueOf(CachedLatestBlocks.getInstance().getTransactionBlock().getHeight()));
             Map<String, byte[]> toSave = new HashMap<>();
-            if (tree.isPresent()) {
-                if (!treeObjects.isEmpty() && treeObjects.size() > 1) {
+            if (!treeObjects.isEmpty()) {
+                if (treeObjects.size() > 1) {
                     treeObjects.stream().skip(1).forEach(val -> {
                         try {
                             toSave.put(((MemoryTreePool) patricia_tree_wrapper.decode(val)).getHeight(), val);
@@ -200,9 +244,7 @@ public class SyncTransactionBlockTask {
                             throw new RuntimeException(e);
                         }
                     });
-                }
-            } else {
-                if (!treeObjects.isEmpty()) {
+                } else {
                     treeObjects.stream().forEach(val -> {
                         try {
                             toSave.put(((MemoryTreePool) patricia_tree_wrapper.decode(val)).getHeight(), val);
@@ -212,7 +254,6 @@ public class SyncTransactionBlockTask {
                     });
                 }
             }
-
             if (toSave == null || patriciaRootList == null) {
                 if (client != null) {
                     client.close();
@@ -223,7 +264,6 @@ public class SyncTransactionBlockTask {
 
             List<String> finalPatriciaRootList = patriciaRootList;
             Map<String, byte[]> toCollect = toSave.entrySet().stream().filter(x -> !finalPatriciaRootList.contains(x.getKey())).collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
-            tree_database.saveAll(toCollect);
             byte[] current_tree = toCollect.get(String.valueOf(CachedLatestBlocks.getInstance().getTransactionBlock().getHeight()));
             if (current_tree == null) {
                 if (client != null) {
@@ -234,7 +274,19 @@ public class SyncTransactionBlockTask {
             }
             TreeFactory.setMemoryTree((MemoryTreePool) patricia_tree_wrapper.decode(current_tree), zone);
 
+            for(int i=0;i<transactionModels.size();i++){
+                AccountStateModel accountStateModel1 = new AccountStateModel();
+                accountStateModel1.setBalance(TreeFactory.getMemoryTree(zone).getByaddress(transactionModels.get(i).getFrom()).get().getAmount());
+                accountStateModel1.setStaked(50);
+                accountStateModel1.setAccountStateObject(new AccountStateObject(transactionModels.get(i).getFrom(), zone));
 
+                AccountStateModel accountStateModel2= new AccountStateModel();
+                accountStateModel2.setBalance(TreeFactory.getMemoryTree(zone).getByaddress(transactionModels.get(i).getTo()).get().getAmount());
+                accountStateModel2.setStaked(50);
+                accountStateModel2.setAccountStateObject(new AccountStateObject(transactionModels.get(i).getTo(), zone));
+                accountStateModels.add(accountStateModel2);
+            }
+            accountStateService.saveAll(accountStateModels);
             LOG.info("TreeFactory Height: " + TreeFactory.getMemoryTree(zone).getHeight());
             if (client != null) {
                 client.close();

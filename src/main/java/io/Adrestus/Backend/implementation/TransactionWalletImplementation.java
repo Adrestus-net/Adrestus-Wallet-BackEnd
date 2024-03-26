@@ -6,7 +6,7 @@ import io.Adrestus.Backend.Service.AccountService;
 import io.Adrestus.Backend.Service.AccountStateService;
 import io.Adrestus.Backend.Service.BlockService;
 import io.Adrestus.Backend.Service.TransactionService;
-import io.Adrestus.Backend.Util.TransactionConverterUtil;
+import io.Adrestus.Backend.Util.ConverterUtil;
 import io.Adrestus.Backend.model.BlockModel;
 import io.Adrestus.Backend.payload.response.ResponseDao;
 import io.Adrestus.MemoryTreePool;
@@ -42,7 +42,7 @@ public class TransactionWalletImplementation implements TransactionWalletReposit
     @Override
     public String addTransaction(Transaction transaction) {
         BlockModel blockModel = blockService.findByBlockhash("0359b4704f3026e59d8837fde6f2ed075fc3642a0dcc79cc0dd23abfa7fcf851");
-        transactionService.save(TransactionConverterUtil.convert(transaction, blockModel));
+        transactionService.save(ConverterUtil.convert(transaction, blockModel));
 //        MessageListener messageListener = new MessageListener();
 //        Strategy transactionStrategy = new Strategy(new TransactionStrategy(transaction, messageListener));
 //        transactionStrategy.SendTransactionSync();
@@ -57,8 +57,8 @@ public class TransactionWalletImplementation implements TransactionWalletReposit
         ArrayList<Transaction> to = new ArrayList<>();
         List<TransactionDetailsDTO> fromModel = transactionService.findTransactionsByFromAddress(address);
         List<TransactionDetailsDTO> toModel = transactionService.findTransactionsByToAddress(address);
-        fromModel.stream().forEach(val -> from.add(TransactionConverterUtil.convert(val)));
-        toModel.stream().forEach(val -> to.add(TransactionConverterUtil.convert(val)));
+        fromModel.stream().forEach(val -> from.add(ConverterUtil.convert(val)));
+        toModel.stream().forEach(val -> to.add(ConverterUtil.convert(val)));
         return new ResponseDao(from, to);
     }
 

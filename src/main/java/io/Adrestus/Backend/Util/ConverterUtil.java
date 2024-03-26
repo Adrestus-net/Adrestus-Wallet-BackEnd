@@ -5,12 +5,16 @@ import io.Adrestus.Backend.model.BlockModel;
 import io.Adrestus.Backend.model.TransactionModel;
 import io.Adrestus.core.RegularTransaction;
 import io.Adrestus.core.Transaction;
+import io.Adrestus.core.TransactionBlock;
+import io.Adrestus.util.GetTime;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Hex;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
-public class TransactionConverterUtil {
+public class ConverterUtil {
 
     public static Transaction convert(TransactionDetailsDTO transactionDetailsDTO) {
         Transaction transaction = new RegularTransaction();
@@ -53,6 +57,33 @@ public class TransactionConverterUtil {
         transactionModel.setPub(Hex.encodeHexString(transaction.getSignature().getPub()));
         transactionModel.setBlockModel(blockModel);
         return transactionModel;
+    }
+
+    @SneakyThrows
+    public static BlockModel convert(TransactionBlock transactionBlock) {
+        BlockModel blockModel = new BlockModel();
+        blockModel.setBlockhash(transactionBlock.getHash());
+        blockModel.setPreviousHash(transactionBlock.getHeaderData().getPreviousHash());
+        blockModel.setTimestamp(GetTime.GetTimestampFromString(transactionBlock.getHeader().getTimestamp()));
+        blockModel.setSize(transactionBlock.getSize());
+        blockModel.setHeight(transactionBlock.getHeight());
+        blockModel.setGeneration(transactionBlock.getGeneration());
+        blockModel.setViewID(transactionBlock.getViewID());
+        blockModel.setZone(transactionBlock.getZone());
+        blockModel.setTransactionProposer(transactionBlock.getTransactionProposer());
+        blockModel.setLeaderPublicKey(transactionBlock.getLeaderPublicKey().toRaw());
+        blockModel.setMerkleRoot(transactionBlock.getMerkleRoot());
+        blockModel.setPatriciaMerkleRoot(transactionBlock.getPatriciaMerkleRoot());
+        return blockModel;
+    }
+
+    @SneakyThrows
+    public static ArrayList<BlockModel> convert(List<TransactionBlock> transactionBlock) {
+        ArrayList<BlockModel> list = new ArrayList<>();
+        for (TransactionBlock trblock : transactionBlock) {
+            list.add(convert(trblock));
+        }
+        return list;
     }
 
 }

@@ -29,4 +29,8 @@ public class BlockService {
     public List<TransactionDetailsDTO> findAllTransactionsByBlockHash(String hash) {
         return blockRepository.findAllTransactionsByBlockHash(hash);
     }
+
+    public BlockModel findLatestAddedBlockByTimestamp() {
+        return this.blockRepository.findLatestAddedBlockByTimestamp();
+    }
 }
