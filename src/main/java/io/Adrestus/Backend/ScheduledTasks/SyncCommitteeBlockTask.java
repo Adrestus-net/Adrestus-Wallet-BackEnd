@@ -28,7 +28,6 @@ public class SyncCommitteeBlockTask {
 
     @Scheduled(fixedRate = APIConfiguration.COMMITTEE_BLOCK_RATE)
     public void syncBlock() {
-        IDatabase<String, CommitteeBlock> committeeBlockIDatabase = new DatabaseFactory(String.class, CommitteeBlock.class).getDatabase(DatabaseType.ROCKS_DB, DatabaseInstance.COMMITTEE_BLOCK);
         List<String> ips = CachedLatestBlocks.getInstance().getCommitteeBlock().getStructureMap().get(0).values().stream().collect(Collectors.toList());
         ArrayList<InetSocketAddress> toConnectCommittee = new ArrayList<>();
         ips.stream().forEach(ip -> {
@@ -57,7 +56,6 @@ public class SyncCommitteeBlockTask {
             return;
 
 
-        commitee_blocks.stream().skip(1).forEach(block -> committeeBlockIDatabase.save(String.valueOf(block.getHeight()), block));
         CachedLatestBlocks.getInstance().setCommitteeBlock(commitee_blocks.get(commitee_blocks.size() - 1));
 
         LOG.info("Committee Block Height: " + CachedLatestBlocks.getInstance().getCommitteeBlock().getHeight());

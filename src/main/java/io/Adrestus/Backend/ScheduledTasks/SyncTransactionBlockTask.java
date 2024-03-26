@@ -141,7 +141,6 @@ public class SyncTransactionBlockTask {
         });
 
         RpcAdrestusClient client = null;
-        List<String> patriciaRootList = null;
         ArrayList<TransactionModel>transactionModels=new ArrayList<>();
         ArrayList<AccountModel>accountModels=new ArrayList<>();
         ArrayList<AccountStateModel>accountStateModels=new ArrayList<>();
@@ -159,7 +158,6 @@ public class SyncTransactionBlockTask {
             if (block!=null) {
                 blocks = client.getBlocksList(String.valueOf(block.getHeight()));
                 if (!blocks.isEmpty() && blocks.size() > 1) {
-                    patriciaRootList = new ArrayList<>(blocks.stream().filter(val -> val.getGeneration() > CachedLatestBlocks.getInstance().getCommitteeBlock().getGeneration()).map(TransactionBlock::getHash).collect(Collectors.toList()));
                     blocks.removeIf(x -> x.getGeneration() > CachedLatestBlocks.getInstance().getCommitteeBlock().getGeneration());
                     blocks.stream().skip(1).forEach(val -> toSave.add(val));
                 }
@@ -167,19 +165,11 @@ public class SyncTransactionBlockTask {
             } else {
                 blocks = client.getBlocksList("");
                 if (!blocks.isEmpty()) {
-                    patriciaRootList = new ArrayList<>(blocks.stream().filter(val -> val.getGeneration() > CachedLatestBlocks.getInstance().getCommitteeBlock().getGeneration()).map(TransactionBlock::getHash).collect(Collectors.toList()));
                     blocks.removeIf(x -> x.getGeneration() > CachedLatestBlocks.getInstance().getCommitteeBlock().getGeneration());
                     blocks.stream().forEach(val -> toSave.add(val));
                 }
             }
 
-            if (patriciaRootList == null) {
-                if (client != null) {
-                    client.close();
-                    client = null;
-                }
-                return;
-            }
            ArrayList<BlockModel>blockModels= ConverterUtil.convert(toSave);
            blockService.saveAll(blockModels);
             if (!blocks.isEmpty()) {
@@ -254,7 +244,7 @@ public class SyncTransactionBlockTask {
                     });
                 }
             }
-            if (toSave == null || patriciaRootList == null) {
+            if (toSave == null) {
                 if (client != null) {
                     client.close();
                     client = null;
@@ -262,9 +252,7 @@ public class SyncTransactionBlockTask {
                 return;
             }
 
-            List<String> finalPatriciaRootList = patriciaRootList;
-            Map<String, byte[]> toCollect = toSave.entrySet().stream().filter(x -> !finalPatriciaRootList.contains(x.getKey())).collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
-            byte[] current_tree = toCollect.get(String.valueOf(CachedLatestBlocks.getInstance().getTransactionBlock().getHeight()));
+            byte[] current_tree = toSave.get(String.valueOf(CachedLatestBlocks.getInstance().getTransactionBlock().getHeight()));
             if (current_tree == null) {
                 if (client != null) {
                     client.close();
