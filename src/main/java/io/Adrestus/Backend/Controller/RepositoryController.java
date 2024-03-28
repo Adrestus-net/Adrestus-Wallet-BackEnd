@@ -1,8 +1,7 @@
 package io.Adrestus.Backend.Controller;
 
 
-import io.Adrestus.Backend.DTO.AccountDetailsDTO;
-import io.Adrestus.Backend.DTO.TransactionDetailsDTO;
+import io.Adrestus.Backend.DTO.*;
 import io.Adrestus.Backend.Service.AccountService;
 import io.Adrestus.Backend.Service.AccountStateService;
 import io.Adrestus.Backend.Service.BlockService;
@@ -66,5 +65,40 @@ public class RepositoryController {
     @GetMapping("/block/{block_hash}")
     public @ResponseBody BlockModel getBlockByHash(@PathVariable("block_hash") String block_hash) {
         return this.blockService.findByBlockhash(block_hash);
+    }
+
+    @GetMapping("/transactionNumberPerBlock/{block_hash}")
+    public @ResponseBody CounterDetailsDTO findNumberOfTransactionsByBlockHash(@PathVariable("block_hash") String block_hash) {
+        return this.blockService.findNumberOfTransactionsByBlockHash(block_hash);
+    }
+
+    @GetMapping("/transactionNumberPerAccount/{address}")
+    public @ResponseBody CounterDetailsDTO findNumberOfTransactionsByAccountAddress(@PathVariable("address") String address) {
+        return this.accountService.findNumberOfTransactionsByAccountAddress(address);
+    }
+
+    @GetMapping("/transactionByAccountAddressInRange/{address}/{from}/{to}")
+    public @ResponseBody List<LimitTransactionsDetailsDTO> findTransactionByAccountAddressInRange(@PathVariable("address") String address, @PathVariable("from") int from, @PathVariable("to") int to) {
+        return this.accountService.findTransactionByAccountAddressInRange(address, from, to);
+    }
+
+    @GetMapping("/findAllBlocksBetweenRange/{from}/{to}")
+    public @ResponseBody List<LimitBlockDetailsDTO> findAllBlocksBetweenRange(@PathVariable("from") int from, @PathVariable("to") int to) {
+        return this.blockService.findAllBlocksBetweenRange(from, to);
+    }
+
+    @GetMapping("/findAllTransactionsBetweenRange/{from}/{to}")
+    public @ResponseBody List<LimitTransactionsDetailsDTO> findAllTransactionsBetweenRange(@PathVariable("from") int from, @PathVariable("to") int to) {
+        return this.transactionService.findAllTransactionsBetweenRange(from, to);
+    }
+
+    @GetMapping("/findNumberOfAllBlocks/")
+    public @ResponseBody CounterDetailsDTO findNumberOfAllBlocks() {
+        return this.blockService.findNumberOfAllBlocks();
+    }
+
+    @GetMapping("/findNumberOfAllTransactions/")
+    public @ResponseBody CounterDetailsDTO findNumberOfAllTransactions() {
+        return this.transactionService.findNumberOfAllTransactions();
     }
 }

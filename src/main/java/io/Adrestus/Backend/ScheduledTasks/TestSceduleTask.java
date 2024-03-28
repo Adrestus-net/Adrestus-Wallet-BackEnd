@@ -112,7 +112,7 @@ public class TestSceduleTask {
         blockModel.setPreviousHash("blockhash" + (counter - 1));
         blockModel.setBlockhash(HashUtil.sha256("blockhash" + counter));
         blockModel.setVersion(0x00);
-        blockModel.setTimestamp(new Timestamp(System.currentTimeMillis()));
+        blockModel.setTimestamp(new Timestamp(System.currentTimeMillis()).toString());
         blockModel.setHeight(counter);
         blockModel.setGeneration(counter);
         blockModel.setViewID(counter);

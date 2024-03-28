@@ -1,5 +1,7 @@
 package io.Adrestus.Backend.Service;
 
+import io.Adrestus.Backend.DTO.CounterDetailsDTO;
+import io.Adrestus.Backend.DTO.LimitTransactionsDetailsDTO;
 import io.Adrestus.Backend.DTO.TransactionDetailsDTO;
 import io.Adrestus.Backend.Repository.TransactionRepository;
 import io.Adrestus.Backend.model.TransactionModel;
@@ -25,6 +27,14 @@ public class TransactionService {
 
     public TransactionModel findByTransactionhash(String transactionHash) {
         return this.transactionRepository.findByTransactionhash(transactionHash);
+    }
+
+    public List<LimitTransactionsDetailsDTO> findAllTransactionsBetweenRange(int from, int to) {
+        return this.transactionRepository.findAllTransactionsBetweenRange(from, to);
+    }
+
+    public CounterDetailsDTO findNumberOfAllTransactions() {
+        return this.transactionRepository.findNumberOfAllTransactions();
     }
 
     public List<TransactionDetailsDTO> findTransactionsByFromAddress(String from) {

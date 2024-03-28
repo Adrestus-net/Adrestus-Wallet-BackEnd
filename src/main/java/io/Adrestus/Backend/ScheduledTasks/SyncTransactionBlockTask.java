@@ -13,13 +13,12 @@ import io.Adrestus.MemoryTreePool;
 import io.Adrestus.TreeFactory;
 import io.Adrestus.core.CommitteeBlock;
 import io.Adrestus.core.Resourses.CachedLatestBlocks;
-import io.Adrestus.core.Transaction;
 import io.Adrestus.core.TransactionBlock;
 import io.Adrestus.mapper.MemoryTreePoolSerializer;
 import io.Adrestus.network.CachedEventLoop;
 import io.Adrestus.rpc.RpcAdrestusClient;
 import io.Adrestus.util.SerializationUtil;
-import io.distributedLedger.*;
+import io.distributedLedger.ZoneDatabaseFactory;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +70,7 @@ public class SyncTransactionBlockTask {
         List<SerializationUtil.Mapping> list2 = new ArrayList<>();
         patricia_tree_wrapper = new SerializationUtil<>(fluentType, list);
     }
+
     @Scheduled(fixedRate = APIConfiguration.TRANSACTION_BLOCK_RATE)
     public void syncBlock() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(4);
@@ -141,9 +141,9 @@ public class SyncTransactionBlockTask {
         });
 
         RpcAdrestusClient client = null;
-        ArrayList<TransactionModel>transactionModels=new ArrayList<>();
-        ArrayList<AccountModel>accountModels=new ArrayList<>();
-        ArrayList<AccountStateModel>accountStateModels=new ArrayList<>();
+        ArrayList<TransactionModel> transactionModels = new ArrayList<>();
+        ArrayList<AccountModel> accountModels = new ArrayList<>();
+        ArrayList<AccountStateModel> accountStateModels = new ArrayList<>();
         try {
             try {
                 client = new RpcAdrestusClient(new TransactionBlock(), toConnectTransaction, CachedEventLoop.getInstance().getEventloop());
@@ -153,9 +153,9 @@ public class SyncTransactionBlockTask {
                 return;
             }
             BlockModel block = blockService.findLatestAddedBlockByTimestamp();
-            ArrayList<TransactionBlock>toSave=new ArrayList<>();
+            ArrayList<TransactionBlock> toSave = new ArrayList<>();
             List<TransactionBlock> blocks;
-            if (block!=null) {
+            if (block != null) {
                 blocks = client.getBlocksList(String.valueOf(block.getHeight()));
                 if (!blocks.isEmpty() && blocks.size() > 1) {
                     blocks.removeIf(x -> x.getGeneration() > CachedLatestBlocks.getInstance().getCommitteeBlock().getGeneration());
@@ -170,14 +170,14 @@ public class SyncTransactionBlockTask {
                 }
             }
 
-           ArrayList<BlockModel>blockModels= ConverterUtil.convert(toSave);
-           blockService.saveAll(blockModels);
+            ArrayList<BlockModel> blockModels = ConverterUtil.convert(toSave);
+            blockService.saveAll(blockModels);
             if (!blocks.isEmpty()) {
                 blocks.stream().forEach(transactionBlock -> {
                     transactionBlock.getTransactionList().stream().forEach(transaction -> {
-                        Optional<BlockModel>blockModel=blockModels.stream().filter(val->val.getBlockhash().equals(transactionBlock.getHash())).findFirst();
-                        if(blockModel.isPresent()){
-                            transactionModels.add(ConverterUtil.convert(transaction,blockModel.get()));
+                        Optional<BlockModel> blockModel = blockModels.stream().filter(val -> val.getBlockhash().equals(transactionBlock.getHash())).findFirst();
+                        if (blockModel.isPresent()) {
+                            transactionModels.add(ConverterUtil.convert(transaction, blockModel.get()));
                             AccountModel accountModel1 = new AccountModel();
                             accountModel1.setTimestamp(new Timestamp(System.currentTimeMillis()));
                             accountModel1.setAddress(transaction.getFrom());
@@ -186,11 +186,10 @@ public class SyncTransactionBlockTask {
                             accountModel2.setAddress(transaction.getTo());
                             accountModels.add(accountModel1);
                             accountModels.add(accountModel2);
-                        }
-                        else{
-                            BlockModel blockModel1=ConverterUtil.convert(transactionBlock);
+                        } else {
+                            BlockModel blockModel1 = ConverterUtil.convert(transactionBlock);
                             blockService.save(blockModel1);
-                            transactionModels.add(ConverterUtil.convert(transaction,blockModel1));
+                            transactionModels.add(ConverterUtil.convert(transaction, blockModel1));
                             AccountModel accountModel1 = new AccountModel();
                             accountModel1.setTimestamp(new Timestamp(System.currentTimeMillis()));
                             accountModel1.setAddress(transaction.getFrom());
@@ -223,7 +222,7 @@ public class SyncTransactionBlockTask {
             client = new RpcAdrestusClient(new byte[]{}, toConnectPatricia, CachedEventLoop.getInstance().getEventloop());
             client.connect();
 
-            List<byte[]>  treeObjects = client.getPatriciaTreeList(String.valueOf(CachedLatestBlocks.getInstance().getTransactionBlock().getHeight()));
+            List<byte[]> treeObjects = client.getPatriciaTreeList(String.valueOf(CachedLatestBlocks.getInstance().getTransactionBlock().getHeight()));
             Map<String, byte[]> toSave = new HashMap<>();
             if (!treeObjects.isEmpty()) {
                 if (treeObjects.size() > 1) {
@@ -262,13 +261,13 @@ public class SyncTransactionBlockTask {
             }
             TreeFactory.setMemoryTree((MemoryTreePool) patricia_tree_wrapper.decode(current_tree), zone);
 
-            for(int i=0;i<transactionModels.size();i++){
+            for (int i = 0; i < transactionModels.size(); i++) {
                 AccountStateModel accountStateModel1 = new AccountStateModel();
                 accountStateModel1.setBalance(TreeFactory.getMemoryTree(zone).getByaddress(transactionModels.get(i).getFrom()).get().getAmount());
                 accountStateModel1.setStaked(50);
                 accountStateModel1.setAccountStateObject(new AccountStateObject(transactionModels.get(i).getFrom(), zone));
 
-                AccountStateModel accountStateModel2= new AccountStateModel();
+                AccountStateModel accountStateModel2 = new AccountStateModel();
                 accountStateModel2.setBalance(TreeFactory.getMemoryTree(zone).getByaddress(transactionModels.get(i).getTo()).get().getAmount());
                 accountStateModel2.setStaked(50);
                 accountStateModel2.setAccountStateObject(new AccountStateObject(transactionModels.get(i).getTo(), zone));

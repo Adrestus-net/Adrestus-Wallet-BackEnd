@@ -1,5 +1,7 @@
 package io.Adrestus.Backend.Service;
 
+import io.Adrestus.Backend.DTO.CounterDetailsDTO;
+import io.Adrestus.Backend.DTO.LimitTransactionsDetailsDTO;
 import io.Adrestus.Backend.Repository.AccountRepository;
 import io.Adrestus.Backend.model.AccountModel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,5 +41,14 @@ public class AccountService {
 
     public AccountModel findLastAccountEntry() {
         return this.accountRepository.findLastAccountEntry();
+    }
+
+
+    public CounterDetailsDTO findNumberOfTransactionsByAccountAddress(String address) {
+        return this.accountRepository.findNumberOfTransactionsByAccountAddress(address);
+    }
+
+    public List<LimitTransactionsDetailsDTO> findTransactionByAccountAddressInRange(String address, int from, int to) {
+        return this.accountRepository.findTransactionByAccountAddressInRange(address, from, to);
     }
 }

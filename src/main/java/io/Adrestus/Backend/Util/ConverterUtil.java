@@ -64,7 +64,7 @@ public class ConverterUtil {
         BlockModel blockModel = new BlockModel();
         blockModel.setBlockhash(transactionBlock.getHash());
         blockModel.setPreviousHash(transactionBlock.getHeaderData().getPreviousHash());
-        blockModel.setTimestamp(GetTime.GetTimestampFromString(transactionBlock.getHeader().getTimestamp()));
+        blockModel.setTimestamp(GetTime.GetTimestampFromString(transactionBlock.getHeader().getTimestamp()).toString());
         blockModel.setSize(transactionBlock.getSize());
         blockModel.setHeight(transactionBlock.getHeight());
         blockModel.setGeneration(transactionBlock.getGeneration());

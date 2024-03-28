@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,7 +26,7 @@ public class BlockModel {
     private String previousHash;
 
     @Column(name = "timestamp", nullable = false)
-    private Timestamp timestamp;
+    private String timestamp;
 
     @Column(name = "size", nullable = false)
     private int size;
@@ -78,11 +77,11 @@ public class BlockModel {
         this.height = height;
     }
 
-    public Timestamp getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Timestamp timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
 
