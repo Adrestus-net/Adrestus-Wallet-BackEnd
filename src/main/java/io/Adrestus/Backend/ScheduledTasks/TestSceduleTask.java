@@ -295,10 +295,10 @@ public class TestSceduleTask {
         transactionModels.forEach(val->trxHashes.add(val.getTransactionhash()));
         LimitBlockDetailsDTO limitBlockDetailsDTO=this.blockService.findLimitBlockDetailsDTOByHash(blockModel.getBlockhash());
         List<LimitTransactionsDetailsDTO> limitTransactionsDetailsDTOS=this.transactionService.findLimitTransactionsDetailsByTransactionHash(trxHashes);
-        String jsonBlockModel= JsonConvertUtil.ObjtoString(limitBlockDetailsDTO);
-        String jsonTransactionModels= JsonConvertUtil.ArrayObjectToString(limitTransactionsDetailsDTOS);
-        this.template.convertAndSend("/topic/blocks", jsonBlockModel);
-        this.template.convertAndSend("/topic/transactions", jsonTransactionModels);
+//        String jsonBlockModel= JsonConvertUtil.ObjtoString(limitBlockDetailsDTO);
+//        String jsonTransactionModels= JsonConvertUtil.ArrayObjectToString(limitTransactionsDetailsDTOS);
+        this.template.convertAndSend("/topic/blocks", limitBlockDetailsDTO);
+        this.template.convertAndSend("/topic/transactions", limitTransactionsDetailsDTOS);
 
         //       int g = accountStateService.updateAccountSetBalanceForAddress(500, "from1", 0);
 //        accountStateModel.setStaked(300);
