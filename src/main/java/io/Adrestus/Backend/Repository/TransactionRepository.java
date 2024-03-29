@@ -7,6 +7,7 @@ import io.Adrestus.Backend.model.TransactionModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,11 @@ import java.util.List;
 public interface TransactionRepository extends JpaRepository<TransactionModel, Long> {
     TransactionModel findByTransactionhash(String transactionHash);
 
+    @Query(value =
+            "SELECT DISTINCT trx.transactionhash as transaction_hash, trx.transaction_type as transactionType, trx.status as statusType, trx.timestamp as creationDate,  trx.zone_from as zoneFrom, trx.zone_to as zoneTo, trx.from as fromAddress, trx.to as toAddress, trx.amount as amount, trx.amount_with_transaction_fee as amountWithTransactionFee, br.height as blockHeight " +
+                    "FROM user.transactions trx, user.blocks br\n" +
+                    "WHERE trx.block_hash=br.blockhash AND trx.transactionhash IN :hashes", nativeQuery = true)
+    List<LimitTransactionsDetailsDTO> findLimitTransactionsDetailsByTransactionHash(@Param("hashes") List<String> hashes);
     @Query(value = "SELECT DISTINCT COUNT(trx.transactionhash) as trxcounter FROM user.transactions trx", nativeQuery = true)
     CounterDetailsDTO findNumberOfAllTransactions();
 

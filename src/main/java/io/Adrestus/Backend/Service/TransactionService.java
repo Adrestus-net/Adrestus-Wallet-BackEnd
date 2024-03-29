@@ -29,6 +29,10 @@ public class TransactionService {
         return this.transactionRepository.findByTransactionhash(transactionHash);
     }
 
+    public List<LimitTransactionsDetailsDTO> findLimitTransactionsDetailsByTransactionHash(List<String> hashes) {
+        return this.transactionRepository.findLimitTransactionsDetailsByTransactionHash(hashes);
+    }
+
     public List<LimitTransactionsDetailsDTO> findAllTransactionsBetweenRange(int from, int to) {
         return this.transactionRepository.findAllTransactionsBetweenRange(from, to);
     }

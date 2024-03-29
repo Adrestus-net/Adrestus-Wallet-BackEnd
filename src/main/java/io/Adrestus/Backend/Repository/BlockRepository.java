@@ -19,6 +19,13 @@ public interface BlockRepository extends JpaRepository<BlockModel, Long> {
     @Query(value = "SELECT DISTINCT COUNT(br.blockhash) as trxcounter FROM user.blocks br", nativeQuery = true)
     CounterDetailsDTO findNumberOfAllBlocks();
 
+
+    @Query(value =
+            "SELECT br.zone as zone, br.blockhash as hash, br.height as height, br.timestamp as timestamp, br.transaction_proposer as miner, br.merkle_root as merkleRoot, count(trx.transactionhash) as transactions\n" +
+                    "FROM user.transactions trx, user.blocks br\n" +
+                    "WHERE trx.block_hash=br.blockhash AND br.blockhash= ?1 \n" +
+                    "GROUP BY br.blockhash", nativeQuery = true)
+    LimitBlockDetailsDTO findLimitBlockDetailsDTOByHash(String hash);
     @Query(value =
             "SELECT br.zone as zone, br.blockhash as hash, br.height as height, br.timestamp as timestamp, br.transaction_proposer as miner, br.merkle_root as merkleRoot, count(trx.transactionhash) as transactions\n" +
                     "FROM user.transactions trx, user.blocks br\n" +

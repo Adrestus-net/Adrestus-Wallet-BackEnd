@@ -1,11 +1,15 @@
 package io.Adrestus.Backend.ScheduledTasks;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.Adrestus.Backend.Config.APIConfiguration;
+import io.Adrestus.Backend.DTO.LimitBlockDetailsDTO;
+import io.Adrestus.Backend.DTO.LimitTransactionsDetailsDTO;
 import io.Adrestus.Backend.Service.AccountService;
 import io.Adrestus.Backend.Service.AccountStateService;
 import io.Adrestus.Backend.Service.BlockService;
 import io.Adrestus.Backend.Service.TransactionService;
+import io.Adrestus.Backend.Util.JsonConvertUtil;
 import io.Adrestus.Backend.model.*;
 import io.Adrestus.config.AdrestusConfiguration;
 import io.Adrestus.core.StatusType;
@@ -29,6 +33,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -36,6 +42,7 @@ import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.TreeSet;
 
@@ -70,7 +77,7 @@ public class TestSceduleTask {
 
 
     @Scheduled(fixedRate = APIConfiguration.TRANSACTION_TEST_BLOCK_RATE)
-    public void test() throws InterruptedException, MnemonicException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+    public void test() throws InterruptedException, MnemonicException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, IOException {
 
         TreeSet<String> addresses = new TreeSet<>();
         ArrayList<TransactionModel> transactionModels = new ArrayList<>();
@@ -283,8 +290,15 @@ public class TestSceduleTask {
         addresses.add(adddress3);
         addresses.add(adddress4);
         accountStateService.saveAll(accountStateModels);
-        this.template.convertAndSend("/topic/blocks", blockModel);
-        this.template.convertAndSend("/topic/transactions", transactionModels);
+
+        ArrayList<String>trxHashes=new ArrayList<>();
+        transactionModels.forEach(val->trxHashes.add(val.getTransactionhash()));
+        LimitBlockDetailsDTO limitBlockDetailsDTO=this.blockService.findLimitBlockDetailsDTOByHash(blockModel.getBlockhash());
+        List<LimitTransactionsDetailsDTO> limitTransactionsDetailsDTOS=this.transactionService.findLimitTransactionsDetailsByTransactionHash(trxHashes);
+        String jsonBlockModel= JsonConvertUtil.ObjtoString(limitBlockDetailsDTO);
+        String jsonTransactionModels= JsonConvertUtil.ArrayObjectToString(limitTransactionsDetailsDTOS);
+        this.template.convertAndSend("/topic/blocks", jsonBlockModel);
+        this.template.convertAndSend("/topic/transactions", jsonTransactionModels);
 
         //       int g = accountStateService.updateAccountSetBalanceForAddress(500, "from1", 0);
 //        accountStateModel.setStaked(300);

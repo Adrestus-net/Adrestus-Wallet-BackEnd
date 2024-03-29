@@ -28,6 +28,10 @@ public class BlockService {
         return blockRepository.findByBlockhash(BlockHash);
     }
 
+    public LimitBlockDetailsDTO findLimitBlockDetailsDTOByHash(String hash) {
+        return this.blockRepository.findLimitBlockDetailsDTOByHash(hash);
+    }
+
     public List<LimitBlockDetailsDTO> findAllBlocksBetweenRange(int from, int to) {
         return this.blockRepository.findAllBlocksBetweenRange(from, to);
     }
