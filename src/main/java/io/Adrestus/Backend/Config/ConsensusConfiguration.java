@@ -259,6 +259,11 @@ public class ConsensusConfiguration implements ApplicationListener<ApplicationEn
         accountStateModels.add(new AccountStateModel(new AccountStateObject(address11,0),3000,3000));
         accountStateModels.add(new AccountStateModel(new AccountStateObject(address12,0),3000,3000));
 
+        accountStateModels.add(new AccountStateModel(new AccountStateObject("ADR-GBIV-HG2J-27P5-BNVN-MLN6-DL5V-M3YZ-PKEJ-CFFG-FK4L",0),1000,1000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject("ADR-GBZX-XXCW-LWJC-J7RZ-Q6BJ-RFBA-J5WU-NBAG-4RL7-7G6Z",0),1000,1000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject("ADR-GD3G-DK4I-DKM2-IQSB-KBWL-HWRV-BBQA-MUAS-MGXA-5QPP",0),1000,1000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject("ADR-GC2I-WBAW-IKJE-BWFC-ML6T-BNOC-7XOU-IQ74-BJ5L-WP7G",0),1000,1000));
+
         TreeFactory.getMemoryTree(1).store(address1, new PatriciaTreeNode(3000, 0));
         TreeFactory.getMemoryTree(1).store(address2, new PatriciaTreeNode(3000, 0));
         TreeFactory.getMemoryTree(1).store(address3, new PatriciaTreeNode(3000, 0));
