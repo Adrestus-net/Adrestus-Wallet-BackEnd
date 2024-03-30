@@ -266,6 +266,7 @@ public class SyncTransactionBlockTask {
                 accountStateModel1.setBalance(TreeFactory.getMemoryTree(zone).getByaddress(transactionModels.get(i).getFrom()).get().getAmount());
                 accountStateModel1.setStaked(50);
                 accountStateModel1.setAccountStateObject(new AccountStateObject(transactionModels.get(i).getFrom(), zone));
+                accountStateModels.add(accountStateModel1);
 
                 AccountStateModel accountStateModel2 = new AccountStateModel();
                 accountStateModel2.setBalance(TreeFactory.getMemoryTree(zone).getByaddress(transactionModels.get(i).getTo()).get().getAmount());
