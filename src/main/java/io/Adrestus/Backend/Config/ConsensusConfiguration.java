@@ -2,6 +2,11 @@ package io.Adrestus.Backend.Config;
 
 
 import com.google.common.reflect.TypeToken;
+import io.Adrestus.Backend.Service.AccountService;
+import io.Adrestus.Backend.Service.AccountStateService;
+import io.Adrestus.Backend.model.AccountModel;
+import io.Adrestus.Backend.model.AccountStateModel;
+import io.Adrestus.Backend.model.AccountStateObject;
 import io.Adrestus.MemoryTreePool;
 import io.Adrestus.TreeFactory;
 import io.Adrestus.Trie.PatriciaTreeNode;
@@ -33,17 +38,24 @@ import io.Adrestus.util.GetTime;
 import io.Adrestus.util.SerializationUtil;
 import io.distributedLedger.*;
 import org.apache.commons.codec.binary.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Configuration
+@EnableJpaRepositories("io.Adrestus.Backend.Repository")
 public class ConsensusConfiguration implements ApplicationListener<ApplicationEnvironmentPreparedEvent> {
     private static BLSPrivateKey sk1;
     private static BLSPublicKey vk1;
@@ -72,7 +84,19 @@ public class ConsensusConfiguration implements ApplicationListener<ApplicationEn
     private static char[] passphrase;
     private static byte[] key1, key2, key3, key4, key5, key6, key7, key8, key9, key10, key11, key12;
 
-    public ConsensusConfiguration() throws Exception {
+    @Autowired
+    @Lazy
+    private AccountStateService accountStateService;
+
+    @Autowired
+    @Lazy
+    private AccountService accountService;
+
+    public ConsensusConfiguration() {
+    }
+
+    @Bean
+    public void Init() throws Exception {
         Type fluentType = new TypeToken<MemoryTreePool>() {
         }.getType();
         List<SerializationUtil.Mapping> list2 = new ArrayList<>();
@@ -162,6 +186,9 @@ public class ConsensusConfiguration implements ApplicationListener<ApplicationEn
         ecKeyPair12 = Keys.createEcKeyPair(random);
 
 
+
+        List<AccountModel>accountModels=new ArrayList<>();
+        List<AccountStateModel>accountStateModels=new ArrayList<>();
         address1 = WalletAddress.generate_address((byte) version, ecKeyPair1.getPublicKey());
         address2 = WalletAddress.generate_address((byte) version, ecKeyPair2.getPublicKey());
         address3 = WalletAddress.generate_address((byte) version, ecKeyPair3.getPublicKey());
@@ -174,6 +201,25 @@ public class ConsensusConfiguration implements ApplicationListener<ApplicationEn
         address10 = WalletAddress.generate_address((byte) version, ecKeyPair10.getPublicKey());
         address11 = WalletAddress.generate_address((byte) version, ecKeyPair11.getPublicKey());
         address12 = WalletAddress.generate_address((byte) version, ecKeyPair12.getPublicKey());
+
+        accountModels.add(new AccountModel(address1,new Timestamp(System.currentTimeMillis())));
+        accountModels.add(new AccountModel(address2,new Timestamp(System.currentTimeMillis())));
+        accountModels.add(new AccountModel(address3,new Timestamp(System.currentTimeMillis())));
+        accountModels.add(new AccountModel(address4,new Timestamp(System.currentTimeMillis())));
+        accountModels.add(new AccountModel(address5,new Timestamp(System.currentTimeMillis())));
+        accountModels.add(new AccountModel(address6,new Timestamp(System.currentTimeMillis())));
+        accountModels.add(new AccountModel(address7,new Timestamp(System.currentTimeMillis())));
+        accountModels.add(new AccountModel(address8,new Timestamp(System.currentTimeMillis())));
+        accountModels.add(new AccountModel(address9,new Timestamp(System.currentTimeMillis())));
+        accountModels.add(new AccountModel(address10,new Timestamp(System.currentTimeMillis())));
+        accountModels.add(new AccountModel(address11,new Timestamp(System.currentTimeMillis())));
+        accountModels.add(new AccountModel(address12,new Timestamp(System.currentTimeMillis())));
+        accountModels.add(new AccountModel("ADR-GBIV-HG2J-27P5-BNVN-MLN6-DL5V-M3YZ-PKEJ-CFFG-FK4L",new Timestamp(System.currentTimeMillis())));
+        accountModels.add(new AccountModel("ADR-GBZX-XXCW-LWJC-J7RZ-Q6BJ-RFBA-J5WU-NBAG-4RL7-7G6Z",new Timestamp(System.currentTimeMillis())));
+        accountModels.add(new AccountModel("ADR-GD3G-DK4I-DKM2-IQSB-KBWL-HWRV-BBQA-MUAS-MGXA-5QPP",new Timestamp(System.currentTimeMillis())));
+        accountModels.add(new AccountModel("ADR-GC2I-WBAW-IKJE-BWFC-ML6T-BNOC-7XOU-IQ74-BJ5L-WP7G",new Timestamp(System.currentTimeMillis())));
+
+
 
         ECDSASignatureData signatureData1 = ecdsaSign.secp256SignMessage(HashUtil.sha256(StringUtils.getBytesUtf8(address1)), ecKeyPair1);
         ECDSASignatureData signatureData2 = ecdsaSign.secp256SignMessage(HashUtil.sha256(StringUtils.getBytesUtf8(address2)), ecKeyPair2);
@@ -200,6 +246,19 @@ public class ConsensusConfiguration implements ApplicationListener<ApplicationEn
         TreeFactory.getMemoryTree(0).store("ADR-GD3G-DK4I-DKM2-IQSB-KBWL-HWRV-BBQA-MUAS-MGXA-5QPP", new PatriciaTreeNode(1000, 0));
         TreeFactory.getMemoryTree(0).store("ADR-GC2I-WBAW-IKJE-BWFC-ML6T-BNOC-7XOU-IQ74-BJ5L-WP7G", new PatriciaTreeNode(1000, 0));
 
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address1,0),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address2,0),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address3,0),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address4,0),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address5,0),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address6,0),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address7,0),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address8,0),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address9,0),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address10,0),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address11,0),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address12,0),3000,3000));
+
         TreeFactory.getMemoryTree(1).store(address1, new PatriciaTreeNode(3000, 0));
         TreeFactory.getMemoryTree(1).store(address2, new PatriciaTreeNode(3000, 0));
         TreeFactory.getMemoryTree(1).store(address3, new PatriciaTreeNode(3000, 0));
@@ -216,6 +275,25 @@ public class ConsensusConfiguration implements ApplicationListener<ApplicationEn
         TreeFactory.getMemoryTree(1).store("ADR-GBZX-XXCW-LWJC-J7RZ-Q6BJ-RFBA-J5WU-NBAG-4RL7-7G6Z", new PatriciaTreeNode(2000, 0));
         TreeFactory.getMemoryTree(1).store("ADR-GD3G-DK4I-DKM2-IQSB-KBWL-HWRV-BBQA-MUAS-MGXA-5QPP", new PatriciaTreeNode(2000, 0));
         TreeFactory.getMemoryTree(1).store("ADR-GC2I-WBAW-IKJE-BWFC-ML6T-BNOC-7XOU-IQ74-BJ5L-WP7G", new PatriciaTreeNode(2000, 0));
+
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address1,1),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address2,1),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address3,1),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address4,1),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address5,1),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address6,1),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address7,1),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address8,1),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address9,1),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address10,1),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address11,1),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address12,1),3000,3000));
+
+        accountStateModels.add(new AccountStateModel(new AccountStateObject("ADR-GBIV-HG2J-27P5-BNVN-MLN6-DL5V-M3YZ-PKEJ-CFFG-FK4L",1),1000,1000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject("ADR-GBZX-XXCW-LWJC-J7RZ-Q6BJ-RFBA-J5WU-NBAG-4RL7-7G6Z",1),2000,2000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject("ADR-GD3G-DK4I-DKM2-IQSB-KBWL-HWRV-BBQA-MUAS-MGXA-5QPP",1),2000,2000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject("ADR-GC2I-WBAW-IKJE-BWFC-ML6T-BNOC-7XOU-IQ74-BJ5L-WP7G",1),2000,2000));
+
 
         TreeFactory.getMemoryTree(2).store(address1, new PatriciaTreeNode(3000, 0));
         TreeFactory.getMemoryTree(2).store(address2, new PatriciaTreeNode(3000, 0));
@@ -234,6 +312,25 @@ public class ConsensusConfiguration implements ApplicationListener<ApplicationEn
         TreeFactory.getMemoryTree(2).store("ADR-GD3G-DK4I-DKM2-IQSB-KBWL-HWRV-BBQA-MUAS-MGXA-5QPP", new PatriciaTreeNode(3000, 0));
         TreeFactory.getMemoryTree(2).store("ADR-GC2I-WBAW-IKJE-BWFC-ML6T-BNOC-7XOU-IQ74-BJ5L-WP7G", new PatriciaTreeNode(3000, 0));
 
+
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address1,2),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address2,2),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address3,2),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address4,2),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address5,2),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address6,2),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address7,2),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address8,2),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address9,2),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address10,2),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address11,2),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address12,2),3000,3000));
+
+        accountStateModels.add(new AccountStateModel(new AccountStateObject("ADR-GBIV-HG2J-27P5-BNVN-MLN6-DL5V-M3YZ-PKEJ-CFFG-FK4L",2),1000,1000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject("ADR-GBZX-XXCW-LWJC-J7RZ-Q6BJ-RFBA-J5WU-NBAG-4RL7-7G6Z",2),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject("ADR-GD3G-DK4I-DKM2-IQSB-KBWL-HWRV-BBQA-MUAS-MGXA-5QPP",2),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject("ADR-GC2I-WBAW-IKJE-BWFC-ML6T-BNOC-7XOU-IQ74-BJ5L-WP7G",2),3000,3000));
+
         TreeFactory.getMemoryTree(3).store(address1, new PatriciaTreeNode(3000, 0));
         TreeFactory.getMemoryTree(3).store(address2, new PatriciaTreeNode(3000, 0));
         TreeFactory.getMemoryTree(3).store(address3, new PatriciaTreeNode(3000, 0));
@@ -251,6 +348,27 @@ public class ConsensusConfiguration implements ApplicationListener<ApplicationEn
         TreeFactory.getMemoryTree(3).store("ADR-GD3G-DK4I-DKM2-IQSB-KBWL-HWRV-BBQA-MUAS-MGXA-5QPP", new PatriciaTreeNode(4000, 0));
         TreeFactory.getMemoryTree(3).store("ADR-GC2I-WBAW-IKJE-BWFC-ML6T-BNOC-7XOU-IQ74-BJ5L-WP7G", new PatriciaTreeNode(4000, 0));
 
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address1,3),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address2,3),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address3,3),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address4,3),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address5,3),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address6,3),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address7,3),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address8,3),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address9,3),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address10,3),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address11,3),3000,3000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject(address12,3),3000,3000));
+
+        accountStateModels.add(new AccountStateModel(new AccountStateObject("ADR-GBIV-HG2J-27P5-BNVN-MLN6-DL5V-M3YZ-PKEJ-CFFG-FK4L",3),1000,1000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject("ADR-GBZX-XXCW-LWJC-J7RZ-Q6BJ-RFBA-J5WU-NBAG-4RL7-7G6Z",3),4000,4000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject("ADR-GD3G-DK4I-DKM2-IQSB-KBWL-HWRV-BBQA-MUAS-MGXA-5QPP",3),4000,4000));
+        accountStateModels.add(new AccountStateModel(new AccountStateObject("ADR-GC2I-WBAW-IKJE-BWFC-ML6T-BNOC-7XOU-IQ74-BJ5L-WP7G",3),4000,4000));
+
+
+        accountService.saveAll(accountModels);
+        accountStateService.saveAll(accountStateModels);
 
         kad1 = new KademliaData(new SecurityAuditProofs(address1, vk1, ecKeyPair1.getPublicKey(), signatureData1), new NettyConnectionInfo("192.168.1.106", KademliaConfiguration.PORT));
         kad2 = new KademliaData(new SecurityAuditProofs(address2, vk2, ecKeyPair2.getPublicKey(), signatureData2), new NettyConnectionInfo("192.168.1.113", KademliaConfiguration.PORT));

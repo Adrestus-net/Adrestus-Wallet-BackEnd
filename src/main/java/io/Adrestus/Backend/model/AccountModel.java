@@ -27,6 +27,12 @@ public class AccountModel implements Serializable {
     @Column(name = "timestamp", updatable = false, nullable = false)
     private Timestamp timestamp;
 
+
+    public AccountModel(String address, Timestamp timestamp) {
+        this.address = address;
+        this.timestamp = timestamp;
+    }
+
     @OneToMany(mappedBy = "accountModel")
     @ToString.Exclude
     @JsonIgnore

@@ -35,6 +35,13 @@ public class AccountStateModel {
 //    @JsonIgnore
 //    private List<TransactionModel> transactions;
 
+
+    public AccountStateModel(AccountStateObject accountStateObject, double balance, double staked) {
+        this.accountStateObject = accountStateObject;
+        this.balance = balance;
+        this.staked = staked;
+    }
+
     public double getBalance() {
         return balance;
     }

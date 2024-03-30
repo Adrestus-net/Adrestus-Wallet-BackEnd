@@ -16,7 +16,6 @@ public final class AccountStateObject implements Serializable {
     public AccountStateObject() {
     }
 
-
     public AccountStateObject(String address, int zoneId) {
         this.address = address;
         this.zoneId = zoneId;
