@@ -42,7 +42,7 @@ public class TransactionWalletImplementation implements TransactionWalletReposit
     @Override
     public String addTransaction(Transaction transaction) {
         BlockModel blockModel = blockService.findByBlockhash("0359b4704f3026e59d8837fde6f2ed075fc3642a0dcc79cc0dd23abfa7fcf851");
-        transactionService.save(ConverterUtil.convert(transaction, blockModel));
+        transactionService.save(ConverterUtil.convert(transaction, blockModel,1));
 //        MessageListener messageListener = new MessageListener();
 //        Strategy transactionStrategy = new Strategy(new TransactionStrategy(transaction, messageListener));
 //        transactionStrategy.SendTransactionSync();

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.Adrestus.Backend.Config.APIConfiguration;
 import io.Adrestus.Backend.DTO.LimitBlockDetailsDTO;
 import io.Adrestus.Backend.DTO.LimitTransactionsDetailsDTO;
+import io.Adrestus.Backend.DTO.TransactionDetailsDTO;
 import io.Adrestus.Backend.Service.AccountService;
 import io.Adrestus.Backend.Service.AccountStateService;
 import io.Adrestus.Backend.Service.BlockService;
@@ -143,6 +144,7 @@ public class TestSceduleTask {
         transactionModel.setAmount(counter + 100);
         transactionModel.setAmountWithTransactionFee((counter + 100) * ((double) 10 / 100));
         transactionModel.setNonce(counter);
+        transactionModel.setPosition(counter);
         transactionModel.setXAxis(ramdonBigInteger().toString());
         transactionModel.setYAxis(ramdonBigInteger().toString());
         transactionModel.setV((byte) 1);
@@ -164,6 +166,7 @@ public class TestSceduleTask {
         transactionModel1.setAmount(counter + 100);
         transactionModel1.setAmountWithTransactionFee((counter + 100) * ((double) 10 / 100));
         transactionModel1.setNonce(counter);
+        transactionModel1.setPosition(counter);
         transactionModel1.setXAxis(ramdonBigInteger().toString());
         transactionModel1.setYAxis(ramdonBigInteger().toString());
         transactionModel1.setV((byte) 1);
@@ -185,6 +188,7 @@ public class TestSceduleTask {
         transactionModel3.setAmount(counter + 100);
         transactionModel3.setAmountWithTransactionFee((counter + 100) * ((double) 10 / 100));
         transactionModel3.setNonce(counter);
+        transactionModel3.setPosition(counter);
         transactionModel3.setXAxis(ramdonBigInteger().toString());
         transactionModel3.setYAxis(ramdonBigInteger().toString());
         transactionModel3.setV((byte) 1);
@@ -206,6 +210,7 @@ public class TestSceduleTask {
         transactionModel4.setAmount(counter + 100);
         transactionModel4.setAmountWithTransactionFee((counter + 100) * ((double) 10 / 100));
         transactionModel4.setNonce(counter);
+        transactionModel4.setPosition(counter);
         transactionModel4.setXAxis(ramdonBigInteger().toString());
         transactionModel4.setYAxis(ramdonBigInteger().toString());
         transactionModel4.setV((byte) 1);

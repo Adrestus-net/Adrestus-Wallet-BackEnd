@@ -1,8 +1,10 @@
 package io.Adrestus.Backend.ScheduledTasks;
 
 
+import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 import io.Adrestus.Backend.Config.APIConfiguration;
+import io.Adrestus.Backend.DTO.TransactionDetailsDTO;
 import io.Adrestus.Backend.Service.AccountService;
 import io.Adrestus.Backend.Service.AccountStateService;
 import io.Adrestus.Backend.Service.BlockService;
@@ -181,7 +183,8 @@ public class SyncTransactionBlockTask {
                     transactionBlock.getTransactionList().stream().forEach(transaction -> {
                         Optional<BlockModel> blockModel = blockModels.stream().filter(val -> val.getBlockhash().equals(transactionBlock.getHash())).findFirst();
                         if (blockModel.isPresent()) {
-                            transactionModels.add(ConverterUtil.convert(transaction, blockModel.get()));
+                            int position = Iterables.indexOf(transactionBlock.getTransactionList(), u -> transaction.equals(u));
+                            transactionModels.add(ConverterUtil.convert(transaction, blockModel.get(),position));
                             AccountModel accountModel1 = new AccountModel();
                             accountModel1.setTimestamp(new Timestamp(System.currentTimeMillis()));
                             accountModel1.setAddress(transaction.getFrom());
@@ -193,7 +196,8 @@ public class SyncTransactionBlockTask {
                         } else {
                             BlockModel blockModel1 = ConverterUtil.convert(transactionBlock);
                             blockService.save(blockModel1);
-                            transactionModels.add(ConverterUtil.convert(transaction, blockModel1));
+                            int position = Iterables.indexOf(transactionBlock.getTransactionList(), u -> transaction.equals(u));
+                            transactionModels.add(ConverterUtil.convert(transaction, blockModel1,position));
                             AccountModel accountModel1 = new AccountModel();
                             accountModel1.setTimestamp(new Timestamp(System.currentTimeMillis()));
                             accountModel1.setAddress(transaction.getFrom());
@@ -214,8 +218,8 @@ public class SyncTransactionBlockTask {
                                         .stream()
                                         .forEach(entry -> {
                                             entry.getValue().stream().forEach(receipt -> {
-                                                TransactionModel trx = transactionService.findByTransactionhash(receipt.getTransaction_hash());
-                                                receiptsModels.add(trx.getTo());
+                                                TransactionDetailsDTO trx= blockService.findTransactionByPositionGeneration(receipt.getReceiptBlock().getGeneration(),receipt.getPosition());
+                                                receiptsModels.add(trx.getToAddress());
                                             });
                                         })));
                 CachedLatestBlocks.getInstance().setTransactionBlock(blocks.get(blocks.size() - 1));

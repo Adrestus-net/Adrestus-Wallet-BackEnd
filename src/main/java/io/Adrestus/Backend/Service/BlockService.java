@@ -51,4 +51,8 @@ public class BlockService {
     public CounterDetailsDTO findNumberOfTransactionsByBlockHash(String hash) {
         return this.blockRepository.findNumberOfTransactionsByBlockHash(hash);
     }
+
+    public TransactionDetailsDTO findTransactionByPositionGeneration(int generation, int position) {
+        return this.blockRepository.findTransactionByPositionGeneration(generation, position);
+    }
 }

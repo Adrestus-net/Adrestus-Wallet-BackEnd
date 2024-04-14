@@ -35,7 +35,7 @@ public class ConverterUtil {
     }
 
     @SneakyThrows
-    public static TransactionModel convert(Transaction transaction, BlockModel blockModel) {
+    public static TransactionModel convert(Transaction transaction, BlockModel blockModel,int position) {
         TransactionModel transactionModel = new TransactionModel();
         transactionModel.setTransactionhash(transaction.getHash());
         transactionModel.setType(transaction.getType());
@@ -49,6 +49,7 @@ public class ConverterUtil {
         transactionModel.setAmount(transaction.getAmount());
         transactionModel.setAmountWithTransactionFee(transaction.getAmountWithTransactionFee());
         transactionModel.setNonce(transaction.getNonce());
+        transactionModel.setPosition(position);
         transactionModel.setXAxis(transaction.getXAxis().toString());
         transactionModel.setYAxis(transaction.getYAxis().toString());
         transactionModel.setV(transaction.getSignature().getV());

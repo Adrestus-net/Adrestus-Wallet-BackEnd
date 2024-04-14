@@ -71,6 +71,9 @@ public class TransactionModel {
     @Column(name = "pub", updatable = false, nullable = false)
     private String pub;
 
+    @Column(name = "position", updatable = false, nullable = false)
+    private int position;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "block_hash")
     private BlockModel blockModel;
@@ -223,25 +226,48 @@ public class TransactionModel {
     }
 
 
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TransactionModel that = (TransactionModel) o;
-        return zoneFrom == that.zoneFrom && ZoneTo == that.ZoneTo && Double.compare(amount, that.amount) == 0 && Double.compare(AmountWithTransactionFee, that.AmountWithTransactionFee) == 0 && Nonce == that.Nonce && v == that.v && Objects.equals(transactionhash, that.transactionhash) && type == that.type && status == that.status && Objects.equals(timestamp, that.timestamp) && Objects.equals(from, that.from) && Objects.equals(to, that.to) && Objects.equals(XAxis, that.XAxis) && Objects.equals(YAxis, that.YAxis) && Objects.equals(r, that.r) && Objects.equals(s, that.s) && Objects.equals(pub, that.pub) && Objects.equals(blockModel, that.blockModel);
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        TransactionModel that = (TransactionModel) object;
+        return zoneFrom == that.zoneFrom && ZoneTo == that.ZoneTo && Double.compare(amount, that.amount) == 0 && Double.compare(AmountWithTransactionFee, that.AmountWithTransactionFee) == 0 && Nonce == that.Nonce && v == that.v && position == that.position && Objects.equals(transactionhash, that.transactionhash) && type == that.type && status == that.status && Objects.equals(timestamp, that.timestamp) && Objects.equals(from, that.from) && Objects.equals(to, that.to) && Objects.equals(XAxis, that.XAxis) && Objects.equals(YAxis, that.YAxis) && Objects.equals(r, that.r) && Objects.equals(s, that.s) && Objects.equals(pub, that.pub) && Objects.equals(blockModel, that.blockModel);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(transactionhash, type, status, zoneFrom, ZoneTo, timestamp, from, to, amount, AmountWithTransactionFee, Nonce, XAxis, YAxis, v, r, s, pub, blockModel);
+        return Objects.hash(transactionhash, type, status, zoneFrom, ZoneTo, timestamp, from, to, amount, AmountWithTransactionFee, Nonce, XAxis, YAxis, v, r, s, pub, position, blockModel);
     }
 
     @Override
     public String toString() {
         return "TransactionModel{" +
                 "transactionhash='" + transactionhash + '\'' +
-                ", blockModel=" + blockModel +
+                ", type=" + type +
+                ", status=" + status +
+                ", zoneFrom=" + zoneFrom +
+                ", ZoneTo=" + ZoneTo +
+                ", timestamp='" + timestamp + '\'' +
+                ", from='" + from + '\'' +
                 ", to='" + to + '\'' +
+                ", amount=" + amount +
+                ", AmountWithTransactionFee=" + AmountWithTransactionFee +
+                ", Nonce=" + Nonce +
+                ", XAxis='" + XAxis + '\'' +
+                ", YAxis='" + YAxis + '\'' +
+                ", v=" + v +
+                ", r='" + r + '\'' +
+                ", s='" + s + '\'' +
+                ", pub='" + pub + '\'' +
+                ", position=" + position +
                 '}';
     }
 }
