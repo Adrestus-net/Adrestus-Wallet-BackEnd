@@ -438,48 +438,15 @@ public class ConsensusConfiguration implements ApplicationListener<ApplicationEn
         IDatabase<String, byte[]> patricia_tree2 = new DatabaseFactory(String.class, byte[].class).getDatabase(DatabaseType.ROCKS_DB, PatriciaTreeInstance.PATRICIA_TREE_INSTANCE_2);
         IDatabase<String, byte[]> patricia_tree3 = new DatabaseFactory(String.class, byte[].class).getDatabase(DatabaseType.ROCKS_DB, PatriciaTreeInstance.PATRICIA_TREE_INSTANCE_3);
 
-        TreeFactory.getMemoryTree(0).setHeight("1");
-        TreeFactory.getMemoryTree(1).setHeight("1");
-        TreeFactory.getMemoryTree(2).setHeight("1");
-        TreeFactory.getMemoryTree(3).setHeight("1");
-        patricia_tree0.save(TreeFactory.getMemoryTree(0).getHeight(), patricia_tree_wrapper.encode(TreeFactory.getMemoryTree(0)));
-        patricia_tree1.save(TreeFactory.getMemoryTree(1).getHeight(), patricia_tree_wrapper.encode(TreeFactory.getMemoryTree(1)));
-        patricia_tree2.save(TreeFactory.getMemoryTree(2).getHeight(), patricia_tree_wrapper.encode(TreeFactory.getMemoryTree(2)));
-        patricia_tree3.save(TreeFactory.getMemoryTree(3).getHeight(), patricia_tree_wrapper.encode(TreeFactory.getMemoryTree(3)));
+
+        patricia_tree0.save(String.valueOf(0), patricia_tree_wrapper.encode(TreeFactory.getMemoryTree(0)));
+        patricia_tree1.save(String.valueOf(1),patricia_tree_wrapper.encode(TreeFactory.getMemoryTree(1)));
+        patricia_tree2.save(String.valueOf(2),patricia_tree_wrapper.encode(TreeFactory.getMemoryTree(2)));
+        patricia_tree3.save(String.valueOf(3),patricia_tree_wrapper.encode(TreeFactory.getMemoryTree(3)));
 
         CachedEventLoop.getInstance().start();
     }
 
-    //    public ConsensusConfiguration() {
-//        sk1 = new BLSPrivateKey(1);
-//        vk1 = new BLSPublicKey(sk1);
-//    }
-
-
-    //Use this only to test workerTest
-//    @Override
-//    public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
-//        IDatabase<String, CommitteeBlock> committeeBlockIDatabase = new DatabaseFactory(String.class, CommitteeBlock.class).getDatabase(DatabaseType.ROCKS_DB, DatabaseInstance.COMMITTEE_BLOCK);
-//        Optional<CommitteeBlock>val=committeeBlockIDatabase.seekLast();
-//        if(val.isPresent()){
-//            CachedLatestBlocks.getInstance().setCommitteeBlock(val.get());
-//        }
-//        else {
-//            CommitteeBlock committeeBlock = new CommitteeBlock();
-//            committeeBlock.setGeneration(1);
-//            committeeBlock.setViewID(1);
-//            // prevblock.setHeight(1);
-//            //prevblock.setHash("hash");
-//            //prevblock.getHeaderData().setTimestamp(GetTime.GetTimeStampInString());
-//            CachedLatestBlocks.getInstance().setCommitteeBlock(committeeBlock);
-//
-//            CachedLatestBlocks.getInstance().getCommitteeBlock().getStructureMap().get(0).put(vk1, APIConfiguration.BOOTSTRAP_NODE_IP);
-//        }
-//
-//        CachedEpochGeneration.getInstance().setEpoch_counter(0);
-//        CachedLeaderIndex.getInstance().setTransactionPositionLeader(0);
-//
-//    }
     @Override
     public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
 

@@ -32,7 +32,9 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -126,6 +128,7 @@ public class SyncTransactionBlockTask {
 
         if (new_ips.isEmpty()) return;
 
+        LOG.info("Zone: " + zone);
         int RPCTransactionZonePort = ZoneDatabaseFactory.getDatabaseRPCPort(zone);
         int RPCPatriciaTreeZonePort = ZoneDatabaseFactory.getDatabasePatriciaRPCPort(ZoneDatabaseFactory.getPatriciaTreeZoneInstance(zone));
         ArrayList<InetSocketAddress> toConnectTransaction = new ArrayList<>();
@@ -142,6 +145,7 @@ public class SyncTransactionBlockTask {
 
         RpcAdrestusClient client = null;
         ArrayList<TransactionModel> transactionModels = new ArrayList<>();
+        ArrayList<String> receiptsModels = new ArrayList<>();
         ArrayList<AccountModel> accountModels = new ArrayList<>();
         ArrayList<AccountStateModel> accountStateModels = new ArrayList<>();
         try {
@@ -201,6 +205,19 @@ public class SyncTransactionBlockTask {
                         }
                     });
                 });
+                blocks.stream().forEach(transactionBlock ->
+                        transactionBlock
+                                .getInbound()
+                                .getMap_receipts()
+                                .forEach((key, value) -> value
+                                        .entrySet()
+                                        .stream()
+                                        .forEach(entry -> {
+                                            entry.getValue().stream().forEach(receipt -> {
+                                                TransactionModel trx = transactionService.findByTransactionhash(receipt.getTransaction_hash());
+                                                receiptsModels.add(trx.getTo());
+                                            });
+                                        })));
                 CachedLatestBlocks.getInstance().setTransactionBlock(blocks.get(blocks.size() - 1));
                 LOG.info("Transaction Block Height: " + CachedLatestBlocks.getInstance().getTransactionBlock().getHeight());
                 LOG.info("Transaction List Height: " + CachedLatestBlocks.getInstance().getTransactionBlock().getTransactionList().size());
@@ -222,65 +239,47 @@ public class SyncTransactionBlockTask {
             client = new RpcAdrestusClient(new byte[]{}, toConnectPatricia, CachedEventLoop.getInstance().getEventloop());
             client.connect();
 
-            List<byte[]> treeObjects = client.getPatriciaTreeList(String.valueOf(CachedLatestBlocks.getInstance().getTransactionBlock().getHeight()));
-            Map<String, byte[]> toSave = new HashMap<>();
-            if (!treeObjects.isEmpty()) {
-                if (treeObjects.size() > 1) {
-                    treeObjects.stream().skip(1).forEach(val -> {
-                        try {
-                            toSave.put(((MemoryTreePool) patricia_tree_wrapper.decode(val)).getHeight(), val);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                } else {
-                    treeObjects.stream().forEach(val -> {
-                        try {
-                            toSave.put(((MemoryTreePool) patricia_tree_wrapper.decode(val)).getHeight(), val);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                }
-            }
-            if (toSave == null) {
-                if (client != null) {
-                    client.close();
-                    client = null;
-                }
-                return;
-            }
 
-            byte[] current_tree = toSave.get(String.valueOf(CachedLatestBlocks.getInstance().getTransactionBlock().getHeight()));
-            if (current_tree == null) {
-                if (client != null) {
-                    client.close();
-                    client = null;
-                }
-                return;
+            List<byte[]> treeObjects = client.getPatriciaTreeList("");
+            if (!treeObjects.isEmpty()) {
+                TreeFactory.setMemoryTree((MemoryTreePool) patricia_tree_wrapper.decode(treeObjects.get(0)), zone);
             }
-            TreeFactory.setMemoryTree((MemoryTreePool) patricia_tree_wrapper.decode(current_tree), zone);
 
             for (int i = 0; i < transactionModels.size(); i++) {
-                AccountStateModel accountStateModel1 = new AccountStateModel();
-                accountStateModel1.setBalance(TreeFactory.getMemoryTree(zone).getByaddress(transactionModels.get(i).getFrom()).get().getAmount());
-                accountStateModel1.setStaked(50);
-                accountStateModel1.setAccountStateObject(new AccountStateObject(transactionModels.get(i).getFrom(), zone));
-                accountStateModels.add(accountStateModel1);
+                if (transactionModels.get(i).getFrom() == transactionModels.get(i).getTo()) {
+                    AccountStateModel accountStateModel1 = new AccountStateModel();
+                    accountStateModel1.setBalance(TreeFactory.getMemoryTree(zone).getByaddress(transactionModels.get(i).getFrom()).get().getAmount());
+                    accountStateModel1.setStaked(50);
+                    accountStateModel1.setAccountStateObject(new AccountStateObject(transactionModels.get(i).getFrom(), zone));
+                    accountStateModels.add(accountStateModel1);
 
-                AccountStateModel accountStateModel2 = new AccountStateModel();
-                accountStateModel2.setBalance(TreeFactory.getMemoryTree(zone).getByaddress(transactionModels.get(i).getTo()).get().getAmount());
-                accountStateModel2.setStaked(50);
-                accountStateModel2.setAccountStateObject(new AccountStateObject(transactionModels.get(i).getTo(), zone));
-                accountStateModels.add(accountStateModel2);
+                    AccountStateModel accountStateModel2 = new AccountStateModel();
+                    accountStateModel2.setBalance(TreeFactory.getMemoryTree(zone).getByaddress(transactionModels.get(i).getTo()).get().getAmount());
+                    accountStateModel2.setStaked(50);
+                    accountStateModel2.setAccountStateObject(new AccountStateObject(transactionModels.get(i).getTo(), zone));
+                    accountStateModels.add(accountStateModel2);
+                } else {
+                    AccountStateModel accountStateModel1 = new AccountStateModel();
+                    accountStateModel1.setBalance(TreeFactory.getMemoryTree(zone).getByaddress(transactionModels.get(i).getFrom()).get().getAmount());
+                    accountStateModel1.setStaked(50);
+                    accountStateModel1.setAccountStateObject(new AccountStateObject(transactionModels.get(i).getFrom(), zone));
+                    accountStateModels.add(accountStateModel1);
+                }
+            }
+            for (int i = 0; i < receiptsModels.size(); i++) {
+                AccountStateModel accountStateModel1 = new AccountStateModel();
+                accountStateModel1.setBalance(TreeFactory.getMemoryTree(zone).getByaddress(receiptsModels.get(i)).get().getAmount());
+                accountStateModel1.setStaked(50);
+                accountStateModel1.setAccountStateObject(new AccountStateObject(receiptsModels.get(i), zone));
+                accountStateModels.add(accountStateModel1);
             }
             accountStateService.saveAll(accountStateModels);
-            LOG.info("TreeFactory Height: " + TreeFactory.getMemoryTree(zone).getHeight());
             if (client != null) {
                 client.close();
                 client = null;
             }
         } catch (IllegalArgumentException e) {
+            e.printStackTrace();
         }
 
     }
