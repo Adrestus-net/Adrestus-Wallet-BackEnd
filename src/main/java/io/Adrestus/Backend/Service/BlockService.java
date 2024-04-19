@@ -52,7 +52,7 @@ public class BlockService {
         return this.blockRepository.findNumberOfTransactionsByBlockHash(hash);
     }
 
-    public TransactionDetailsDTO findTransactionByPositionGeneration(int generation, int position) {
-        return this.blockRepository.findTransactionByPositionGeneration(generation, position);
+    public TransactionDetailsDTO findTransactionByPositionHeight(int height,int position) {
+        return this.blockRepository.findTransactionByPositionHeight(height,position);
     }
 }

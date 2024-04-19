@@ -41,8 +41,8 @@ public interface BlockRepository extends JpaRepository<BlockModel, Long> {
     List<TransactionDetailsDTO> findAllTransactionsByBlockHash(String hash);
 
     @Transactional
-    @Query(value = "SELECT trx.transactionhash as transaction_hash, trx.transaction_type as transactionType, trx.status as statusType, trx.zone_from as zoneFrom, trx.zone_to as zoneTo, trx.timestamp as creationDate, trx.from as fromAddress, trx.to as toAddress, trx.amount as amount, trx.amount_with_transaction_fee as amountWithTransactionFee, trx.nonce as nonce, trx.xaxis as xAxis, trx.yaxis as yAxis, trx.v as v, trx.r as r, trx.s as s, trx.pub as pub, br.blockhash as blockHash, br.height as blockHeight FROM user.transactions trx, user.blocks br WHERE br.blockhash=trx.block_hash AND br.generation= ?1 AND trx.position= ?2 LIMIT 1", nativeQuery = true)
-    TransactionDetailsDTO findTransactionByPositionGeneration(int generation,int position);
+    @Query(value = "SELECT trx.transactionhash as transaction_hash, trx.transaction_type as transactionType, trx.status as statusType, trx.zone_from as zoneFrom, trx.zone_to as zoneTo, trx.timestamp as creationDate, trx.from as fromAddress, trx.to as toAddress, trx.amount as amount, trx.amount_with_transaction_fee as amountWithTransactionFee, trx.nonce as nonce, trx.xaxis as xAxis, trx.yaxis as yAxis, trx.v as v, trx.r as r, trx.s as s, trx.pub as pub, br.blockhash as blockHash, br.height as blockHeight FROM user.transactions trx, user.blocks br WHERE br.blockhash=trx.block_hash AND br.height= ?1 AND trx.position= ?2 LIMIT 1", nativeQuery = true)
+    TransactionDetailsDTO findTransactionByPositionHeight(int height,int position);
 
     @Transactional
     @Query(value = "SELECT * FROM user.blocks ORDER BY blocks.timestamp DESC LIMIT 1;", nativeQuery = true)

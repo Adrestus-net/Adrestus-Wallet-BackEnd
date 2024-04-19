@@ -183,7 +183,7 @@ public class SyncTransactionBlockTask {
                     transactionBlock.getTransactionList().stream().forEach(transaction -> {
                         Optional<BlockModel> blockModel = blockModels.stream().filter(val -> val.getBlockhash().equals(transactionBlock.getHash())).findFirst();
                         if (blockModel.isPresent()) {
-                            int position = Iterables.indexOf(transactionBlock.getTransactionList(), u -> transaction.equals(u));
+                            int position = Iterables.indexOf(transactionBlock.getTransactionList(), u -> u.equals(transaction));
                             transactionModels.add(ConverterUtil.convert(transaction, blockModel.get(),position));
                             AccountModel accountModel1 = new AccountModel();
                             accountModel1.setTimestamp(new Timestamp(System.currentTimeMillis()));
@@ -196,7 +196,7 @@ public class SyncTransactionBlockTask {
                         } else {
                             BlockModel blockModel1 = ConverterUtil.convert(transactionBlock);
                             blockService.save(blockModel1);
-                            int position = Iterables.indexOf(transactionBlock.getTransactionList(), u -> transaction.equals(u));
+                            int position = Iterables.indexOf(transactionBlock.getTransactionList(), u -> u.equals(transaction));
                             transactionModels.add(ConverterUtil.convert(transaction, blockModel1,position));
                             AccountModel accountModel1 = new AccountModel();
                             accountModel1.setTimestamp(new Timestamp(System.currentTimeMillis()));
@@ -218,7 +218,7 @@ public class SyncTransactionBlockTask {
                                         .stream()
                                         .forEach(entry -> {
                                             entry.getValue().stream().forEach(receipt -> {
-                                                TransactionDetailsDTO trx= blockService.findTransactionByPositionGeneration(receipt.getReceiptBlock().getGeneration(),receipt.getPosition());
+                                                TransactionDetailsDTO trx= blockService.findTransactionByPositionHeight(receipt.getReceiptBlock().getHeight(),receipt.getPosition());
                                                 receiptsModels.add(trx.getToAddress());
                                             });
                                         })));
@@ -250,7 +250,7 @@ public class SyncTransactionBlockTask {
             }
 
             for (int i = 0; i < transactionModels.size(); i++) {
-                if (transactionModels.get(i).getFrom() == transactionModels.get(i).getTo()) {
+                if (transactionModels.get(i).getFrom().equals(transactionModels.get(i).getTo())) {
                     AccountStateModel accountStateModel1 = new AccountStateModel();
                     accountStateModel1.setBalance(TreeFactory.getMemoryTree(zone).getByaddress(transactionModels.get(i).getFrom()).get().getAmount());
                     accountStateModel1.setStaked(50);
